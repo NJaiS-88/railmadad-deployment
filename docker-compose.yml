@@ -1,0 +1,268 @@
+services:
+  # ============================================================================
+  # 1. DATABASE: MongoDB
+  # ============================================================================
+  mongodb:
+    image: mongo:7.0
+    container_name: railmadad-mongodb
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    environment:
+      MONGO_INITDB_DATABASE: railmadad
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - railmadad-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ============================================================================
+  # 2. REST API: Node.js Express Backend
+  # ============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: railmadad-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/railmadad}
+      JWT_SECRET: ${JWT_SECRET:-railmadad_jwt_secret_key_super_secure_2026}
+      HF_TOKEN: ${HF_TOKEN:-}
+      RAILRADAR_API_KEY: ${RAILRADAR_API_KEY:-}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-+19403267863}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      ML_SERVICE_URL: http://ml-service:8000
+      CLASSIFICATION_SERVICE_URL: http://classification-agent:8001
+      STAFF_SERVICE_URL: http://staff-assignment-agent:8002
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
+    networks:
+      - railmadad-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ============================================================================
+  # 3. AI/ML: Python Multimodal ML Service (Whisper + BLIP + Vision LLM)
+  # ============================================================================
+  ml-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.ml
+    container_name: railmadad-ml-service
+    restart: unless-stopped
+    ports:
+      - "${ML_PORT:-8000}:8000"
+    environment:
+      PORT: 8000
+      NVIDIA_NIM_API_KEY: ${NVIDIA_NIM_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      RAILRADAR_API_KEY: ${RAILRADAR_API_KEY:-}
+    networks:
+      - railmadad-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+      start_period: 25s
+
+  # ============================================================================
+  # 4. AI AGENT: Classification Agent Microservice
+  # ============================================================================
+  classification-agent:
+    build:
+      context: ./classification
+      dockerfile: Dockerfile
+    container_name: railmadad-classification-agent
+    restart: unless-stopped
+    ports:
+      - "${CLASSIFICATION_PORT:-8001}:8001"
+    environment:
+      PORT: 8001
+      MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/railmadad}
+      NVIDIA_NIM_API_KEY: ${NVIDIA_NIM_API_KEY:-}
+      STAFF_ASSIGNMENT_URL: http://staff-assignment-agent:8002/assign-staff
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - railmadad-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ============================================================================
+  # 5. AI AGENT: Staff Assignment Agent Microservice
+  # ============================================================================
+  staff-assignment-agent:
+    build:
+      context: ./staff_assignment
+      dockerfile: Dockerfile
+    container_name: railmadad-staff-assignment-agent
+    restart: unless-stopped
+    ports:
+      - "${STAFF_PORT:-8002}:8002"
+    environment:
+      PORT: 8002
+      MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/railmadad}
+      NVIDIA_NIM_API_KEY: ${NVIDIA_NIM_API_KEY:-}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - railmadad-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ============================================================================
+  # 6. FRONTEND: Passenger Portal (Vite + React)
+  # ============================================================================
+  frontend-passenger:
+    build:
+      context: ./rail-madad-frontend/frontend-passenger
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_ML_URL: ${VITE_ML_URL:-/ml}
+        VITE_ML_SERVICE_URL: ${VITE_ML_SERVICE_URL:-/api/complaints}
+    container_name: railmadad-frontend-passenger
+    restart: unless-stopped
+    ports:
+      - "${PASSENGER_PORT:-5173}:80"
+    networks:
+      - railmadad-network
+    depends_on:
+      - backend
+
+  # ============================================================================
+  # 7. FRONTEND: Officer Dashboard (Vite + React)
+  # ============================================================================
+  frontend-officer:
+    build:
+      context: ./rail-madad-frontend/frontend-officer
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: railmadad-frontend-officer
+    restart: unless-stopped
+    ports:
+      - "${OFFICER_PORT:-5174}:80"
+    networks:
+      - railmadad-network
+    depends_on:
+      - backend
+
+  # ============================================================================
+  # 8. FRONTEND: Railway Staff Portal (Vite + React)
+  # ============================================================================
+  frontend-staff:
+    build:
+      context: ./rail-madad-frontend/frontend-staff
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: railmadad-frontend-staff
+    restart: unless-stopped
+    ports:
+      - "${STAFF_PORT_UI:-5175}:80"
+    networks:
+      - railmadad-network
+    depends_on:
+      - backend
+
+  # ============================================================================
+  # 9. GATEWAY: Unified Reverse Proxy (Nginx)
+  # ============================================================================
+  gateway:
+    image: nginx:alpine
+    container_name: railmadad-gateway
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - ml-service
+      - frontend-passenger
+      - frontend-officer
+      - frontend-staff
+    networks:
+      - railmadad-network
+
+  # ============================================================================
+  # OPTIONAL SERVICES: Twilio Voice & WhatsApp
+  # Run with: docker compose --profile telephony up
+  # ============================================================================
+  twilio-voice:
+    profiles: ["telephony", "all"]
+    build:
+      context: ./twilio
+      dockerfile: Dockerfile
+    container_name: railmadad-twilio-voice
+    restart: unless-stopped
+    ports:
+      - "${TWILIO_VOICE_PORT:-6000}:6000"
+    environment:
+      PORT: 6000
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
+      TWILIO_BASE_URL: ${TWILIO_BASE_URL:-}
+      BACKEND_API_URL: http://backend:5000/api
+      ML_SERVICE_URL: http://ml-service:8000
+      NVIDIA_NIM_API_KEY: ${NVIDIA_NIM_API_KEY:-}
+    networks:
+      - railmadad-network
+
+  twilio-whatsapp:
+    profiles: ["telephony", "all"]
+    build:
+      context: ./twilio_whatsapp
+      dockerfile: Dockerfile
+    container_name: railmadad-twilio-whatsapp
+    restart: unless-stopped
+    ports:
+      - "${TWILIO_WHATSAPP_PORT:-6001}:6001"
+    environment:
+      PORT: 6001
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_WHATSAPP_NUMBER: ${TWILIO_WHATSAPP_NUMBER:-}
+      BACKEND_API_URL: http://backend:5000/api
+      ML_SERVICE_URL: http://ml-service:8000
+      NVIDIA_NIM_API_KEY: ${NVIDIA_NIM_API_KEY:-}
+    networks:
+      - railmadad-network
+
+networks:
+  railmadad-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local

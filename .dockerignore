@@ -1,0 +1,39 @@
+# Git
+.git
+.gitignore
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Node
+**/node_modules
+**/dist
+**/build
+npm-debug.log*
+
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.Python
+**/env
+**/venv
+**/.venv
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+
+# Temporary and Media Cache
+**/*.webm
+**/*.mp4
+**/*.wav
+**/*.avi
+**/*.mov
+**/tmp*
+**/*.tmp

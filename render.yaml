@@ -1,0 +1,47 @@
+# ==============================================================================
+# RailMadad 2.0 - Render Infrastructure Blueprint
+# Use: Render Dashboard -> "New" -> "Blueprint" -> Connect Repository
+# ==============================================================================
+
+services:
+  # ── 1. Backend REST API Server ──────────────────────────────────────────────
+  - type: web
+    name: railmadad-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ML_SERVICE_URL
+        fromService:
+          name: railmadad-ml-service
+          type: web
+          property: url
+
+  # ── 2. Python Multimodal AI Service (Whisper + BLIP + Vision LLM) ───────────
+  - type: web
+    name: railmadad-ml-service
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile.ml
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: NVIDIA_NIM_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: RAILRADAR_API_KEY
+        sync: false

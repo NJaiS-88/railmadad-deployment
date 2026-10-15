@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary-navy: #1E293B;
+  --color-rail-blue: #2563EB;
+  --color-action-orange: #F97316;
+  --color-app-bg: #F8FAFC;
+  --color-app-border: #E2E8F0;
+  --color-app-text: #0F172A;
+  --color-muted-text: #64748B;
+  --color-success-green: #15803D;
+  --color-warning-yellow: #A16207;
+  --color-danger-red: #B91C1C;
+  
+  --font-sans: 'Inter', sans-serif;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #0f172a; /* Dark theme wrapper for the desktop presentation */
+  color: #0f172a;
+  margin: 0;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Hide scrollbars site-wide while keeping scrolling functional */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom styles for high-fidelity mobile frame representation on desktop */
+.mobile-frame-container {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border-radius: 40px;
+  border: 12px solid #1E293B;
+}

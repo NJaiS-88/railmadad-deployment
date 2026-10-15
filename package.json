@@ -1,0 +1,34 @@
+{
+  "name": "railmadad-root",
+  "version": "2.0.0",
+  "description": "Rail Madad - AI-Powered Passenger Grievance & Assistance Platform",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix rail-madad-frontend/frontend-passenger install && npm --prefix rail-madad-frontend/frontend-officer install && npm --prefix rail-madad-frontend/frontend-staff install",
+    "install:backend": "npm --prefix backend install",
+    "install:passenger": "npm --prefix rail-madad-frontend/frontend-passenger install",
+    "install:officer": "npm --prefix rail-madad-frontend/frontend-officer install",
+    "install:staff": "npm --prefix rail-madad-frontend/frontend-staff install",
+    "build:all": "npm --prefix rail-madad-frontend/frontend-passenger run build && npm --prefix rail-madad-frontend/frontend-officer run build && npm --prefix rail-madad-frontend/frontend-staff run build",
+    "build:passenger": "npm --prefix rail-madad-frontend/frontend-passenger run build",
+    "build:officer": "npm --prefix rail-madad-frontend/frontend-officer run build",
+    "build:staff": "npm --prefix rail-madad-frontend/frontend-staff run build",
+    "start:backend": "node backend/server.js",
+    "start:pm2": "pm2 start ecosystem.config.js",
+    "stop:pm2": "pm2 stop ecosystem.config.js",
+    "restart:pm2": "pm2 restart ecosystem.config.js",
+    "logs:pm2": "pm2 logs",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "keywords": [
+    "railway",
+    "railmadad",
+    "ai",
+    "grievance",
+    "assistance"
+  ],
+  "author": "RailMadad Team",
+  "license": "ISC"
+}

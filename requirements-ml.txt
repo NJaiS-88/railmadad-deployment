@@ -1,0 +1,16 @@
+# RailMadad Multimodal AI Service Requirements
+flask>=3.0.0
+flask-cors>=4.0.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+Pillow>=10.0.0
+openai>=1.0.0
+pydantic>=2.0.0
+numpy>=1.24.0
+imageio-ffmpeg>=0.4.9
+opencv-python-headless>=4.8.0
+openai-whisper>=20231117
+transformers>=4.35.0
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch>=2.0.0
+torchvision

@@ -1,0 +1,470 @@
+{
+  "users": [
+    {
+      "name": "Sejal Jain",
+      "email": "jsejal74@gmail.com",
+      "phone": "9167028869",
+      "password": "$2a$10$8i4egIUpHB8ySShezaa3vewluQiI4x.gUuTKDBmh5bWD53VTdu/CS",
+      "_id": "mock_88e6mttc8",
+      "id": "mock_88e6mttc8"
+    },
+    {
+      "name": "Bhavika Jhanwar",
+      "email": "bhavika@gmail.com",
+      "phone": "9876543210",
+      "password": "$2a$10$QuJ02JWNRLcaQ.GSlee71u31ogOtNLzSk27LArywgg6WlH/SYrgrG",
+      "_id": "mock_ttsv0bq33",
+      "id": "mock_ttsv0bq33"
+    }
+  ],
+  "complaints": [
+    {
+      "complaintId": "RMDA65789593",
+      "user": "mock_ttsv0bq33",
+      "passengerName": "Bhavika Jhanwar",
+      "passengerPhone": "9876543210",
+      "trainNumber": "12951 — Mumbai Rajdhani",
+      "coach": "B4",
+      "pnr": "1470258369",
+      "description": "seats aare not clean",
+      "category": "General Complaint",
+      "severity": "Medium",
+      "status": "Rejected",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "aiConversions": {
+        "imageText": "",
+        "audioText": "",
+        "videoText": ""
+      },
+      "llmAnalysis": null,
+      "location": {
+        "lat": "17.4334",
+        "lng": "78.5024",
+        "status": "success",
+        "address": "GPS Location Captured"
+      },
+      "timeline": [
+        {
+          "status": "Submitted",
+          "time": "15 Aug 2026, 05:59 PM",
+          "completed": true
+        },
+        {
+          "status": "Verified",
+          "time": "--",
+          "completed": false
+        },
+        {
+          "status": "Routed to Department",
+          "time": "--",
+          "completed": false
+        },
+        {
+          "status": "Resolved",
+          "time": "--",
+          "completed": false
+        },
+        {
+          "status": "Rejected",
+          "time": "15 Aug 2026, 18:47",
+          "completed": true
+        }
+      ],
+      "_id": "mock_eanlbmod6",
+      "id": "mock_eanlbmod6"
+    },
+    {
+      "complaintId": "RMDA37549497",
+      "user": "mock_ttsv0bq33",
+      "passengerName": "Bhavika Jhanwar",
+      "passengerPhone": "9876543210",
+      "trainNumber": "12626 — Karnataka Express",
+      "coach": "A1",
+      "pnr": "7894561230",
+      "description": "water leakage from ac",
+      "category": "Water Leakage Issue",
+      "severity": "Medium",
+      "status": "Verified",
+      "media": {
+        "image": null,
+        "audio": "blob:http://localhost:5173/a4692480-9978-421a-8a63-ade433fbd187",
+        "video": null
+      },
+      "aiConversions": {
+        "imageText": "",
+        "audioText": "Audio voice note recorded by passenger detailing coach issue.",
+        "videoText": ""
+      },
+      "llmAnalysis": null,
+      "location": {
+        "lat": "17.4334",
+        "lng": "78.5024",
+        "status": "success",
+        "address": "GPS Location Captured"
+      },
+      "timeline": [
+        {
+          "status": "Submitted",
+          "time": "15 Aug 2026, 18:48",
+          "completed": true
+        },
+        {
+          "status": "Verified",
+          "time": "15 Aug 2026, 18:48",
+          "completed": true
+        },
+        {
+          "status": "Routed to Department",
+          "time": "--",
+          "completed": false
+        },
+        {
+          "status": "Resolved",
+          "time": "--",
+          "completed": false
+        }
+      ],
+      "_id": "mock_3984dycxi",
+      "id": "mock_3984dycxi"
+    },
+    {
+      "complaintId": "RMDA85488948",
+      "user": "mock_ttsv0bq33",
+      "passengerName": "Bhavika Jhanwar",
+      "passengerPhone": "9876543210",
+      "trainNumber": "12019 — Secunderabad Exp",
+      "coach": "B4",
+      "pnr": "7419338520",
+      "description": "overcrowding in the train",
+      "category": "Crowd Management Issue",
+      "severity": "Medium",
+      "status": "Verified",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "aiConversions": {
+        "imageText": "",
+        "audioText": "",
+        "videoText": ""
+      },
+      "llmAnalysis": {
+        "action_steps": [
+          "Configure NVIDIA_NIM_API_KEY"
+        ],
+        "are_texts_related": "API key not configured",
+        "has_issue": true,
+        "keywords": [
+          "railway",
+          "complaint"
+        ],
+        "missing_info": "NVIDIA API key not set.",
+        "summary": "train_number: 12019 — Secunderabad Exp\ncoach: B4\npnr: 7419338520\ntext: overcrowding in the train",
+        "urgency": "Medium"
+      },
+      "location": {
+        "lat": "17.4334",
+        "lng": "78.5024",
+        "status": "success",
+        "address": "GPS Location Captured"
+      },
+      "timeline": [
+        {
+          "status": "Submitted",
+          "time": "15 Aug 2026, 18:47",
+          "completed": true
+        },
+        {
+          "status": "Verified",
+          "time": "15 Aug 2026, 18:47",
+          "completed": true
+        },
+        {
+          "status": "Routed to Department",
+          "time": "--",
+          "completed": false
+        },
+        {
+          "status": "Resolved",
+          "time": "--",
+          "completed": false
+        }
+      ],
+      "_id": "mock_u69195jlg",
+      "id": "mock_u69195jlg"
+    },
+    {
+      "complaintId": "RMDA14818540",
+      "user": "mock_ttsv0bq33",
+      "passengerName": "Bhavika Jhanwar",
+      "passengerPhone": "9876543210",
+      "trainNumber": "12951 — Mumbai Rajdhani",
+      "coach": "B4",
+      "pnr": "7459861230",
+      "description": "water leakage issue in washrrom",
+      "category": "Water Leakage Issue",
+      "severity": "Medium",
+      "status": "Verified",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "aiConversions": {
+        "imageText": "",
+        "audioText": "",
+        "videoText": ""
+      },
+      "llmAnalysis": {
+        "action_steps": [
+          "Configure NVIDIA_NIM_API_KEY"
+        ],
+        "are_texts_related": "API key not configured",
+        "has_issue": true,
+        "keywords": [
+          "railway",
+          "complaint"
+        ],
+        "missing_info": "NVIDIA API key not set.",
+        "summary": "train_number: 12951 — Mumbai Rajdhani\ncoach: B4\npnr: 7459861230\ntext: water leakage issue in washrrom",
+        "urgency": "Medium"
+      },
+      "location": {
+        "lat": "17.4334",
+        "lng": "78.5024",
+        "status": "success",
+        "address": "GPS Location Captured"
+      },
+      "timeline": [
+        {
+          "status": "Submitted",
+          "time": "15 Aug 2026, 18:47",
+          "completed": true
+        },
+        {
+          "status": "Verified",
+          "time": "15 Aug 2026, 18:47",
+          "completed": true
+        },
+        {
+          "status": "Routed to Department",
+          "time": "--",
+          "completed": false
+        },
+        {
+          "status": "Resolved",
+          "time": "--",
+          "completed": false
+        }
+      ],
+      "_id": "mock_5s6pyvqwo",
+      "id": "mock_5s6pyvqwo"
+    },
+    {
+      "complaintId": "RMDA78883424",
+      "user": "mock_ttsv0bq33",
+      "passengerName": "Bhavika Jhanwar",
+      "passengerPhone": "9876543210",
+      "trainNumber": "12951 — Mumbai Rajdhani",
+      "coach": "S1",
+      "pnr": "7852419603",
+      "description": "Overcrowded people seating at floor",
+      "category": "Crowd Management Issue",
+      "severity": "Medium",
+      "status": "Verified",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "aiConversions": {
+        "imageText": "",
+        "audioText": "",
+        "videoText": ""
+      },
+      "llmAnalysis": {
+        "action_steps": [
+          "Configure NVIDIA_NIM_API_KEY"
+        ],
+        "are_texts_related": "API key not configured",
+        "has_issue": true,
+        "keywords": [
+          "railway",
+          "complaint"
+        ],
+        "missing_info": "NVIDIA API key not set.",
+        "summary": "train_number: 12951 — Mumbai Rajdhani\ncoach: S1\npnr: 7852419603\ntext: Overcrowded people seating at floor",
+        "urgency": "Medium"
+      },
+      "location": {
+        "lat": "17.4334",
+        "lng": "78.5024",
+        "status": "success",
+        "address": "GPS Location Captured"
+      },
+      "timeline": [
+        {
+          "status": "Submitted",
+          "time": "15 Aug 2026, 18:53",
+          "completed": true
+        },
+        {
+          "status": "Verified",
+          "time": "15 Aug 2026, 18:53",
+          "completed": true
+        },
+        {
+          "status": "Routed to Department",
+          "time": "--",
+          "completed": false
+        },
+        {
+          "status": "Resolved",
+          "time": "--",
+          "completed": false
+        }
+      ],
+      "_id": "mock_59mj7fzhn",
+      "id": "mock_59mj7fzhn"
+    },
+    {
+      "complaintId": "RMDA40859509",
+      "user": "mock_ttsv0bq33",
+      "passengerName": "Bhavika Jhanwar",
+      "passengerPhone": "9876543210",
+      "trainNumber": "12951 — Mumbai Rajdhani",
+      "coach": "A1",
+      "pnr": "7452189603",
+      "description": "water leaked everywhere",
+      "category": "General Complaint",
+      "severity": "Medium",
+      "status": "Submitted",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "aiConversions": {
+        "imageText": "",
+        "audioText": "",
+        "videoText": ""
+      },
+      "llmAnalysis": {
+        "action_steps": [
+          "Configure NVIDIA_NIM_API_KEY"
+        ],
+        "are_texts_related": "API key not configured",
+        "has_issue": true,
+        "keywords": [
+          "railway",
+          "complaint"
+        ],
+        "missing_info": "NVIDIA API key not set.",
+        "summary": "train_number: 12951 — Mumbai Rajdhani\ncoach: A1\npnr: 7452189603\ntext: water leaked everywhere",
+        "urgency": "Medium"
+      },
+      "location": {
+        "lat": "17.4334",
+        "lng": "78.5024",
+        "status": "success",
+        "address": "GPS Location Captured"
+      },
+      "timeline": [
+        {
+          "status": "Submitted",
+          "time": "15 Aug 2026, 06:55 PM",
+          "completed": true
+        },
+        {
+          "status": "Verified",
+          "time": "--",
+          "completed": false
+        },
+        {
+          "status": "Routed to Department",
+          "time": "--",
+          "completed": false
+        },
+        {
+          "status": "Resolved",
+          "time": "--",
+          "completed": false
+        }
+      ],
+      "_id": "mock_6pvohache",
+      "id": "mock_6pvohache"
+    },
+    {
+      "complaintId": "RMDA79154317",
+      "user": "mock_ttsv0bq33",
+      "passengerName": "Bhavika Jhanwar",
+      "passengerPhone": "9876543210",
+      "trainNumber": "12951 — Mumbai Rajdhani",
+      "coach": "A1",
+      "pnr": "7456981032",
+      "description": "water leakage in washroom",
+      "category": "General Complaint",
+      "severity": "Medium",
+      "status": "Submitted",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "aiConversions": {
+        "imageText": "",
+        "audioText": "",
+        "videoText": ""
+      },
+      "llmAnalysis": {
+        "action_steps": [
+          "Configure NVIDIA_NIM_API_KEY"
+        ],
+        "are_texts_related": "API key not configured",
+        "has_issue": true,
+        "keywords": [
+          "railway",
+          "complaint"
+        ],
+        "missing_info": "NVIDIA API key not set.",
+        "summary": "train_number: 12951 — Mumbai Rajdhani\ncoach: A1\npnr: 7456981032\ntext: water leakage in washroom",
+        "urgency": "Medium"
+      },
+      "location": {
+        "lat": "19.29666",
+        "lng": "72.84558",
+        "status": "success",
+        "address": "GPS Auto-Captured"
+      },
+      "timeline": [
+        {
+          "status": "Submitted",
+          "time": "15 Aug 2026, 07:04 PM",
+          "completed": true
+        },
+        {
+          "status": "Verified",
+          "time": "--",
+          "completed": false
+        },
+        {
+          "status": "Routed to Department",
+          "time": "--",
+          "completed": false
+        },
+        {
+          "status": "Resolved",
+          "time": "--",
+          "completed": false
+        }
+      ],
+      "_id": "mock_aij17eob1",
+      "id": "mock_aij17eob1"
+    }
+  ]
+}
