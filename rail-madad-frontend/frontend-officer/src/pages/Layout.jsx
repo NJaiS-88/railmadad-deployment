@@ -60,16 +60,24 @@ export default function Layout() {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/10">
+        <div className="p-4 border-t border-slate-800 bg-slate-950/10 space-y-2">
+          <div className="flex items-center justify-between text-[11px] text-slate-400 font-semibold px-1">
+            <span>Switch Portal:</span>
+            <div className="flex items-center space-x-2">
+              <a href="/" className="hover:text-accent text-slate-300 transition-colors" title="Passenger Portal">🚆 Passenger</a>
+              <span>•</span>
+              <a href="/staff" className="hover:text-accent text-slate-300 transition-colors" title="Staff Portal">👷 Staff</a>
+            </div>
+          </div>
           <button 
             onClick={() => {
               if (confirm('Logout of dashboard?')) {
                 navigate('/');
               }
             }}
-            className="w-full flex items-center space-x-3.5 px-4 py-3 hover:bg-slate-800 hover:text-white transition-colors rounded-xl text-xs font-bold text-slate-400"
+            className="w-full flex items-center space-x-3.5 px-4 py-2.5 hover:bg-slate-800 hover:text-white transition-colors rounded-xl text-xs font-bold text-slate-400"
           >
-            <LogOut className="w-4.5 h-4.5" />
+            <LogOut className="w-4 h-4" />
             <span>Logout</span>
           </button>
         </div>

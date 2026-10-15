@@ -1,0 +1,11 @@
+{
+  "buildCommand": "node rail-madad-frontend/build-all.js",
+  "outputDirectory": "rail-madad-frontend/dist",
+  "rewrites": [
+    { "source": "/officer/:match*", "destination": "/officer/index.html" },
+    { "source": "/officer", "destination": "/officer/index.html" },
+    { "source": "/staff/:match*", "destination": "/staff/index.html" },
+    { "source": "/staff", "destination": "/staff/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

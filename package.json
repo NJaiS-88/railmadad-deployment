@@ -9,6 +9,7 @@
     "install:passenger": "npm --prefix rail-madad-frontend/frontend-passenger install",
     "install:officer": "npm --prefix rail-madad-frontend/frontend-officer install",
     "install:staff": "npm --prefix rail-madad-frontend/frontend-staff install",
+    "build": "node rail-madad-frontend/build-all.js",
     "build:all": "npm --prefix rail-madad-frontend/frontend-passenger run build && npm --prefix rail-madad-frontend/frontend-officer run build && npm --prefix rail-madad-frontend/frontend-staff run build",
     "build:passenger": "npm --prefix rail-madad-frontend/frontend-passenger run build",
     "build:officer": "npm --prefix rail-madad-frontend/frontend-officer run build",

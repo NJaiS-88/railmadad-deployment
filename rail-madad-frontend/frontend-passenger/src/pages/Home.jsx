@@ -204,17 +204,37 @@ export default function Home() {
           </div>
         </div>
 
-        {user ? (
-          <Link to="/profile" className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-50 text-primary border border-blue-200 rounded-full text-xs font-bold">
-            <User className="w-3.5 h-3.5" />
-            <span>{user.name.split(' ')[0]}</span>
-          </Link>
-        ) : (
-          <Link to="/login" className="flex items-center space-x-1.5 px-3 py-1.5 bg-primary text-white rounded-full text-xs font-bold shadow-sm">
-            <LogIn className="w-3.5 h-3.5" />
-            <span>Login</span>
-          </Link>
-        )}
+        <div className="flex items-center space-x-2">
+          {/* Quick Portal Switcher */}
+          <div className="flex items-center space-x-1 mr-1">
+            <a 
+              href="/officer" 
+              className="text-[10px] font-black tracking-wide text-slate-600 hover:text-primary bg-slate-100 hover:bg-blue-50 px-2 py-1 rounded-full transition-colors border border-slate-200 shadow-2xs"
+              title="Switch to Railway Officer Command Center"
+            >
+              👮 Officer
+            </a>
+            <a 
+              href="/staff" 
+              className="text-[10px] font-black tracking-wide text-slate-600 hover:text-primary bg-slate-100 hover:bg-blue-50 px-2 py-1 rounded-full transition-colors border border-slate-200 shadow-2xs"
+              title="Switch to On-Duty Railway Staff App"
+            >
+              👷 Staff
+            </a>
+          </div>
+
+          {user ? (
+            <Link to="/profile" className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-50 text-primary border border-blue-200 rounded-full text-xs font-bold">
+              <User className="w-3.5 h-3.5" />
+              <span>{user.name.split(' ')[0]}</span>
+            </Link>
+          ) : (
+            <Link to="/login" className="flex items-center space-x-1.5 px-3 py-1.5 bg-primary text-white rounded-full text-xs font-bold shadow-sm">
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Login</span>
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Welcome Heading */}

@@ -79,8 +79,10 @@ export default function App() {
     );
   }
 
+  const basename = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || undefined;
+
   return (
-    <Router>
+    <Router basename={basename}>
       {/* Desktop mockup presenting the mobile viewport */}
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-0 md:p-6 font-sans">
         {/* Device frame container */}

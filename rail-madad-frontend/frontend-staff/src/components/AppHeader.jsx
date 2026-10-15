@@ -90,6 +90,12 @@ export default function AppHeader() {
           )}
         </div>
 
+        {/* Quick Portal Switcher */}
+        <div className="flex items-center space-x-1 text-[10px] font-bold text-slate-300">
+          <a href="/" className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 transition text-white" title="Switch to Passenger Portal">🚆 Passenger</a>
+          <a href="/officer" className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 transition text-white" title="Switch to Officer Portal">👮 Officer</a>
+        </div>
+
         {/* Notifications Icon */}
         <Link 
           to="/notifications" 

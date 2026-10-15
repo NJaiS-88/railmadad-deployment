@@ -81,57 +81,39 @@ You have two easy ways to deploy on Render. **Method A (Blueprint)** is one clic
 
 ---
 
-## 🔺 PART 2: Deploy Frontend(s) to Vercel
+## 🔺 PART 2: Deploy ALL Frontends at Once to Vercel (Unified Suite)
 
-### Step 1: Deploy Passenger Portal (Main Web App)
+You can deploy the **Passenger Portal**, **Officer Dashboard**, and **Staff Field Portal** all together under a **single Vercel project and URL**:
+
+### Step 1: Deploy on Vercel
 
 1. Go to **[vercel.com/dashboard](https://vercel.com/dashboard)**.
 2. Click **Add New…** ➔ **Project**.
-3. Import your `RailMadad` GitHub repository.
+3. Import your `railmadad-deployment` GitHub repository.
 4. In the configuration screen:
-   - **Project Name**: `railmadad-passenger` (or your choice)
-   - **Framework Preset**: `Vite`
+   - **Project Name**: `railmadad` (or your choice)
+   - **Framework Preset**: `Other` (or `Vite`)
    - Click **Edit** next to **Root Directory** and select:
      ```
-     rail-madad-frontend/frontend-passenger
+     rail-madad-frontend
      ```
+     *(Or leave as `./` root — both will build all 3 frontends automatically!)*
+   - **Build Command**: `node build-all.js`
+   - **Output Directory**: `dist`
 5. Expand **Environment Variables** and add:
-   - **`VITE_API_URL`**: `https://railmadad-backend.onrender.com/api`
-   - **`VITE_ML_URL`**: `https://railmadad-ml-service.onrender.com`
-   *(Replace with your actual Render URLs)*
+   - **`VITE_API_URL`**: `https://railmadad-backend.onrender.com/api` (your Render backend URL)
+   - **`VITE_ML_URL`**: `https://railmadad-ml-service.onrender.com` (your Render ML URL)
 6. Click **Deploy**.
-7. In ~60 seconds, Vercel will give you a live production URL:
-   `https://railmadad-passenger.vercel.app` 🎉
 
 ---
 
-### Step 2 (Optional): Deploy Officer Dashboard
+### Step 2: Access All 3 Portals Under Your Single Vercel URL! 🎉
 
-1. In Vercel, click **Add New…** ➔ **Project**.
-2. Select the same repository.
-3. Set **Root Directory** to:
-   ```
-   rail-madad-frontend/frontend-officer
-   ```
-4. Add Environment Variable:
-   - **`VITE_API_URL`**: `https://railmadad-backend.onrender.com/api`
-5. Click **Deploy**.
+Once deployed, your single Vercel domain hosts all 3 portals with seamless client-side routing and top-header switcher buttons:
 
----
-
-### Step 3 (Optional): Deploy Staff Portal
-
-1. In Vercel, click **Add New…** ➔ **Project**.
-2. Select the same repository.
-3. Set **Root Directory** to:
-   ```
-   rail-madad-frontend/frontend-staff
-   ```
-4. Add Environment Variable:
-   - **`VITE_API_URL`**: `https://railmadad-backend.onrender.com/api`
-5. Click **Deploy**.
-
----
+* 🚆 **Passenger Portal**: `https://your-app.vercel.app/`
+* 👮 **Officer Dashboard**: `https://your-app.vercel.app/officer`
+* 👷 **Staff Field App**: `https://your-app.vercel.app/staff`
 
 ## 🧪 Testing Your Live Deployment
 

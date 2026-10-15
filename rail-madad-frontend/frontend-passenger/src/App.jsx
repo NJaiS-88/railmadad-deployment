@@ -114,9 +114,11 @@ function MainLayout() {
   );
 }
 
+const basename = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || undefined;
+
 export default function App() {
   return (
-    <Router>
+    <Router basename={basename}>
       <AuthProvider>
         <MainLayout />
       </AuthProvider>

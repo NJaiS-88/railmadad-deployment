@@ -1,0 +1,10 @@
+{
+  "name": "railmadad-frontend-unified",
+  "version": "2.0.0",
+  "description": "RailMadad Unified Frontend Suite (Passenger, Officer & Staff Portals)",
+  "private": true,
+  "scripts": {
+    "build": "node build-all.js",
+    "start": "serve dist"
+  }
+}

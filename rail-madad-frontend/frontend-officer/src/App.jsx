@@ -13,9 +13,11 @@ import Trains from './pages/Trains';
 import StaffApproval from './pages/StaffApproval';
 import Hotspots from './pages/Hotspots';
 
+const basename = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || undefined;
+
 export default function App() {
   return (
-    <Router>
+    <Router basename={basename}>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Overview />} />
