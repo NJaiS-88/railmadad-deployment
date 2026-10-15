@@ -2,6 +2,7 @@
 /**
  * Unified Build Script for RailMadad Frontends on Vercel
  * Builds Passenger (/), Officer (/officer/), and Staff (/staff/) into a single dist/ folder.
+ * Uses direct Node.js execution of Vite to prevent Linux permission/EACCES (status 126) errors.
  */
 
 const { execSync } = require('child_process');
@@ -45,26 +46,55 @@ const baseEnv = {
   VITE_ML_SERVICE_URL: process.env.VITE_ML_SERVICE_URL || process.env.VITE_ML_URL || ''
 };
 
-// 1. Build Passenger Frontend (Root /)
-console.log('\n📦 [1/3] Building Passenger Portal (Root /)...');
-execSync('npm install --include=dev', { cwd: PASSENGER_DIR, stdio: 'inherit', env: baseEnv });
-execSync('npm run build', { cwd: PASSENGER_DIR, stdio: 'inherit', env: { ...baseEnv, VITE_BASE: '/' } });
-copyDirRecursive(path.join(PASSENGER_DIR, 'dist'), OUTPUT_DIST);
-console.log('✅ Passenger Portal built successfully.');
+function buildFrontend(dir, base, label, destSubdir = '') {
+  console.log(`\n📦 Building ${label} (base: "${base}")...`);
+  
+  // 1. Install dependencies
+  execSync('npm install --include=dev --prefer-offline --no-audit --no-fund', {
+    cwd: dir,
+    stdio: 'inherit',
+    env: baseEnv
+  });
 
-// 2. Build Officer Frontend (/officer/)
-console.log('\n📦 [2/3] Building Officer Dashboard (/officer/)...');
-execSync('npm install --include=dev', { cwd: OFFICER_DIR, stdio: 'inherit', env: baseEnv });
-execSync('npm run build', { cwd: OFFICER_DIR, stdio: 'inherit', env: { ...baseEnv, VITE_BASE: '/officer/' } });
-copyDirRecursive(path.join(OFFICER_DIR, 'dist'), path.join(OUTPUT_DIST, 'officer'));
-console.log('✅ Officer Dashboard built successfully.');
+  // 2. Ensure executable permissions on node_modules/.bin on Linux
+  try {
+    const binDir = path.join(dir, 'node_modules', '.bin');
+    if (fs.existsSync(binDir) && process.platform !== 'win32') {
+      execSync(`chmod -R 755 "${binDir}"`, { stdio: 'ignore' });
+    }
+  } catch (_) {}
 
-// 3. Build Staff Frontend (/staff/)
-console.log('\n📦 [3/3] Building Staff Portal (/staff/)...');
-execSync('npm install --include=dev', { cwd: STAFF_DIR, stdio: 'inherit', env: baseEnv });
-execSync('npm run build', { cwd: STAFF_DIR, stdio: 'inherit', env: { ...baseEnv, VITE_BASE: '/staff/' } });
-copyDirRecursive(path.join(STAFF_DIR, 'dist'), path.join(OUTPUT_DIST, 'staff'));
-console.log('✅ Staff Portal built successfully.');
+  // 3. Execute Vite build directly via Node.js process to bypass EACCES / status 126
+  const env = { ...baseEnv, VITE_BASE: base };
+  const viteJs = path.join(dir, 'node_modules', 'vite', 'bin', 'vite.js');
+
+  if (fs.existsSync(viteJs)) {
+    console.log(`   Running: node vite/bin/vite.js build`);
+    execSync(`"${process.execPath}" "${viteJs}" build`, {
+      cwd: dir,
+      stdio: 'inherit',
+      env
+    });
+  } else {
+    console.log(`   Running: npm run build`);
+    execSync('npm run build', {
+      cwd: dir,
+      stdio: 'inherit',
+      env
+    });
+  }
+
+  // 4. Copy build output
+  const builtDist = path.join(dir, 'dist');
+  const targetDist = destSubdir ? path.join(OUTPUT_DIST, destSubdir) : OUTPUT_DIST;
+  copyDirRecursive(builtDist, targetDist);
+  console.log(`✅ ${label} built and copied to ${destSubdir || '/'}`);
+}
+
+// Build all 3 frontends
+buildFrontend(PASSENGER_DIR, '/', 'Passenger Portal [1/3]');
+buildFrontend(OFFICER_DIR, '/officer/', 'Officer Dashboard [2/3]', 'officer');
+buildFrontend(STAFF_DIR, '/staff/', 'Staff Field App [3/3]', 'staff');
 
 // 4. Generate vercel.json in dist for single-app SPA rewrites
 const vercelConfig = {
