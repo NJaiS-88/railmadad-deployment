@@ -155,7 +155,7 @@
       },
       "llmAnalysis": {
         "action_steps": [
-          "Configure NVIDIA_NIM_API_KEY"
+          "Configure OPENROUTER_API_KEY"
         ],
         "are_texts_related": "API key not configured",
         "has_issue": true,
@@ -163,7 +163,7 @@
           "railway",
           "complaint"
         ],
-        "missing_info": "NVIDIA API key not set.",
+        "missing_info": "OpenRouter API key not set.",
         "summary": "train_number: 12019 — Secunderabad Exp\ncoach: B4\npnr: 7419338520\ntext: overcrowding in the train",
         "urgency": "Medium"
       },
@@ -222,7 +222,7 @@
       },
       "llmAnalysis": {
         "action_steps": [
-          "Configure NVIDIA_NIM_API_KEY"
+          "Configure OPENROUTER_API_KEY"
         ],
         "are_texts_related": "API key not configured",
         "has_issue": true,
@@ -230,7 +230,7 @@
           "railway",
           "complaint"
         ],
-        "missing_info": "NVIDIA API key not set.",
+        "missing_info": "OpenRouter API key not set.",
         "summary": "train_number: 12951 — Mumbai Rajdhani\ncoach: B4\npnr: 7459861230\ntext: water leakage issue in washrrom",
         "urgency": "Medium"
       },
@@ -289,7 +289,7 @@
       },
       "llmAnalysis": {
         "action_steps": [
-          "Configure NVIDIA_NIM_API_KEY"
+          "Configure OPENROUTER_API_KEY"
         ],
         "are_texts_related": "API key not configured",
         "has_issue": true,
@@ -297,7 +297,7 @@
           "railway",
           "complaint"
         ],
-        "missing_info": "NVIDIA API key not set.",
+        "missing_info": "OpenRouter API key not set.",
         "summary": "train_number: 12951 — Mumbai Rajdhani\ncoach: S1\npnr: 7852419603\ntext: Overcrowded people seating at floor",
         "urgency": "Medium"
       },
@@ -356,7 +356,7 @@
       },
       "llmAnalysis": {
         "action_steps": [
-          "Configure NVIDIA_NIM_API_KEY"
+          "Configure OPENROUTER_API_KEY"
         ],
         "are_texts_related": "API key not configured",
         "has_issue": true,
@@ -364,7 +364,7 @@
           "railway",
           "complaint"
         ],
-        "missing_info": "NVIDIA API key not set.",
+        "missing_info": "OpenRouter API key not set.",
         "summary": "train_number: 12951 — Mumbai Rajdhani\ncoach: A1\npnr: 7452189603\ntext: water leaked everywhere",
         "urgency": "Medium"
       },
@@ -423,7 +423,7 @@
       },
       "llmAnalysis": {
         "action_steps": [
-          "Configure NVIDIA_NIM_API_KEY"
+          "Configure OPENROUTER_API_KEY"
         ],
         "are_texts_related": "API key not configured",
         "has_issue": true,
@@ -431,7 +431,7 @@
           "railway",
           "complaint"
         ],
-        "missing_info": "NVIDIA API key not set.",
+        "missing_info": "OpenRouter API key not set.",
         "summary": "train_number: 12951 — Mumbai Rajdhani\ncoach: A1\npnr: 7456981032\ntext: water leakage in washroom",
         "urgency": "Medium"
       },

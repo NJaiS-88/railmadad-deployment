@@ -5,7 +5,7 @@ RailMadad — Twilio WhatsApp Complaint Intake Agent
 ────────────────────────────────────────────────────────────────────
 Flow:
   1. Passenger sends WhatsApp message to Twilio WhatsApp number → /whatsapp/incoming
-  2. Greeting + AI conversational turn (meta/llama-3.1-8b-instruct on NVIDIA NIM)
+  2. Greeting + AI conversational turn (meta-llama/llama-3.1-8b-instruct on OpenRouter AI)
   3. Guides conversation step-by-step:
      - Registered Mobile Number
      - Train Number or Name
@@ -43,7 +43,7 @@ except ImportError:
 TWILIO_ACCOUNT_SID  = os.environ.get("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN   = os.environ.get("TWILIO_AUTH_TOKEN", "")
 TWILIO_WHATSAPP_NUM = os.environ.get("TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
-NVIDIA_NIM_API_KEY  = os.environ.get("NVIDIA_NIM_API_KEY", "")
+OPENROUTER_API_KEY  = os.environ.get("OPENROUTER_API_KEY", "")
 BACKEND_API_URL     = os.environ.get("BACKEND_API_URL", "http://127.0.0.1:5000/api")
 ML_SERVICE_URL      = os.environ.get("ML_SERVICE_URL", "http://127.0.0.1:8000")
 
@@ -190,14 +190,14 @@ def rule_based_fallback_turn(user_message: str, current_collected: dict) -> dict
 
 
 def whatsapp_conversation_turn(history: list, user_message: str, current_collected: dict) -> dict:
-    """Send conversation turn to NVIDIA NIM API (Llama 3.1 8B model)."""
+    """Send conversation turn to OpenRouter AI (Llama 3.1 8B model)."""
     try:
         from openai import OpenAI
         client = OpenAI(
-            base_url="https://integrate.api.nvidia.com/v1",
-            api_key=NVIDIA_NIM_API_KEY,
-            timeout=3.5,
-            max_retries=0
+            base_url="https://openrouter.ai/api/v1",
+            api_key=OPENROUTER_API_KEY,
+            timeout=10.0,
+            max_retries=1
         )
 
         messages = [{"role": "system", "content": SYSTEM_PROMPT}]
@@ -208,8 +208,9 @@ def whatsapp_conversation_turn(history: list, user_message: str, current_collect
         messages.append({"role": "user", "content": user_message + context_note})
 
         fast_models = [
-            "meta/llama-3.1-8b-instruct",
-            "meta/llama-3.3-70b-instruct"
+            "meta-llama/llama-3.1-8b-instruct",
+            "meta-llama/llama-3.3-70b-instruct",
+            "google/gemini-2.0-flash-001"
         ]
 
         raw = None

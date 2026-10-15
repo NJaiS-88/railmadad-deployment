@@ -7,7 +7,7 @@ Flow:
   1. Caller dials Twilio number → /voice/incoming
   2. Greeting TwiML + <Record> to capture caller speech
   3. /voice/process → Download recording → Whisper transcription
-  4. Transcription + conversation history → NVIDIA Nemotron
+  4. Transcription + conversation history → OpenRouter AI
   5. Nemotron guides conversation: collect PNR, Train, Coach, Description
   6. When complete → POST to Express backend to create complaint
   7. Map caller phone → user in DB (fallback: create guest entry)
@@ -40,7 +40,7 @@ except ImportError:
 TWILIO_ACCOUNT_SID  = os.environ.get("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN   = os.environ.get("TWILIO_AUTH_TOKEN", "")
 TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER", "")
-NVIDIA_NIM_API_KEY  = os.environ.get("NVIDIA_NIM_API_KEY", "")
+OPENROUTER_API_KEY  = os.environ.get("OPENROUTER_API_KEY", "")
 BACKEND_API_URL     = os.environ.get("BACKEND_API_URL", "http://127.0.0.1:5000/api")
 ML_SERVICE_URL      = os.environ.get("ML_SERVICE_URL", "http://127.0.0.1:8000")
 
@@ -131,7 +131,7 @@ def caption_image_url(image_url: str) -> tuple[str, str]:
 
 
 # ══════════════════════════════════════════════════════════════════
-#  HELPER: NVIDIA Nemotron conversation turn
+#  HELPER: OpenRouter conversation turn
 # ══════════════════════════════════════════════════════════════════
 SYSTEM_PROMPT = """You are RailMadad Voice Assistant, a warm, polite, and empathetic Indian Railways helpline agent.
 Your job is to collect a passenger's complaint over a phone call in a helpful, conversational manner.
@@ -239,16 +239,16 @@ def rule_based_fallback_turn(user_message: str, current_collected: dict) -> dict
 
 def nemotron_conversation_turn(history: list, user_message: str, current_collected: dict) -> dict:
     """
-    Send conversation turn to NVIDIA NIM API (fast Llama 3.1 8B model: ~500ms)
+    Send conversation turn to OpenRouter AI (fast Llama 3.1 8B model: ~500ms)
     with 3.5s timeout and instant 1ms fallback.
     """
     try:
         from openai import OpenAI
         client = OpenAI(
-            base_url="https://integrate.api.nvidia.com/v1",
-            api_key=NVIDIA_NIM_API_KEY,
-            timeout=3.5,       # 3.5s timeout per request
-            max_retries=0      # Disable SDK retries
+            base_url="https://openrouter.ai/api/v1",
+            api_key=OPENROUTER_API_KEY,
+            timeout=10.0,
+            max_retries=1
         )
 
         # Build messages
@@ -259,10 +259,10 @@ def nemotron_conversation_turn(history: list, user_message: str, current_collect
         context_note = f"\n\n[Already collected so far: {json.dumps(current_collected)}]"
         messages.append({"role": "user", "content": user_message + context_note})
 
-        # Put ultra-fast 8B model first (completes in ~500ms)
         fast_models = [
-            "meta/llama-3.1-8b-instruct",
-            "meta/llama-3.3-70b-instruct"
+            "meta-llama/llama-3.1-8b-instruct",
+            "meta-llama/llama-3.3-70b-instruct",
+            "google/gemini-2.0-flash-001"
         ]
 
         raw = None

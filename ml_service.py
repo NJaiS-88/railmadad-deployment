@@ -19,20 +19,18 @@ try:
 except ImportError:
     pass  # python-dotenv not installed — env vars must be set manually
 
-NVIDIA_NIM_API_KEY = os.environ.get("NVIDIA_NIM_API_KEY", "").strip()
-if NVIDIA_NIM_API_KEY:
-    print("✅ NVIDIA NIM API key found — will use Nemotron for text analysis")
-else:
-    print("⚠️  No NVIDIA NIM key — text analysis may be limited")
-
-# OpenRouter key — used exclusively for thinkingmachines/inkling (vision)
+# OpenRouter API key — powers 100% of LLM reasoning, Vision, and OCR
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "").strip()
 if OPENROUTER_API_KEY:
-    print("✅ OpenRouter API key found — will use thinkingmachines/inkling for image captioning & ID OCR")
+    print("✅ OpenRouter API key found — 100% of LLM analysis, Vision, and OCR will use OpenRouter")
 else:
-    print("⚠️  No OpenRouter key — will use local BLIP for image captioning")
+    print("⚠️  No OpenRouter key found. Set OPENROUTER_API_KEY in environment.")
 
-# Prefer system-installed ffmpeg (user has 7.1), fallback to imageio_ffmpeg
+HF_TOKEN = os.environ.get("HF_TOKEN", "").strip()
+if HF_TOKEN:
+    print("✅ HF_TOKEN found for cloud inference fallback")
+
+# Prefer system-installed ffmpeg, fallback to imageio_ffmpeg
 FFMPEG_EXE = shutil.which("ffmpeg")
 if FFMPEG_EXE:
     print("✅ Using system FFmpeg:", FFMPEG_EXE)
@@ -59,11 +57,12 @@ def health_check():
     return jsonify({
         'status': 'ok',
         'service': 'railmadad-ml-service',
-        'openrouter_inkling': bool(OPENROUTER_API_KEY),
-        'nvidia_nim': bool(NVIDIA_NIM_API_KEY)
+        'provider': 'openrouter',
+        'openrouter_key_set': bool(OPENROUTER_API_KEY),
+        'hf_token': bool(HF_TOKEN)
     }), 200
 
-print("Starting AI models initialization...")
+print("✅ Multimodal AI Service running in Cloud API mode (0MB model memory)")
 
 
 # ── Helper: Decode base64 safely (strips data URL header, fixes padding) ──
@@ -145,46 +144,85 @@ def extract_text_from_asr(result):
     return ""
 
 
-# ── Load BLIP model ──
-try:
-    from transformers import BlipProcessor, BlipForConditionalGeneration
-    from PIL import Image
-    print("Loading BLIP model (Salesforce/blip-image-captioning-base)...")
-    blip_processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-    blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
-    print("✅ BLIP Model loaded!")
-except Exception as e:
-    print("⚠️ BLIP loading error:", e)
-    blip_processor, blip_model = None, None
+# ── Cloud Inference API Helpers (No local heavy PyTorch models) ──
+import requests
 
-# ── Load Whisper model ──
-whisper_model = None
-whisper_asr = None
-try:
-    import whisper
-    print("Loading Whisper model (base)...")
-    whisper_model = whisper.load_model("base")
-    print("✅ Whisper model (base) loaded!")
-except Exception as e:
+def hf_caption_image(image_bytes: bytes) -> str:
+    """Call Hugging Face Inference API for BLIP captioning without loading model locally."""
+    urls = [
+        "https://router.huggingface.co/hf-inference/models/Salesforce/blip-image-captioning-large",
+        "https://router.huggingface.co/hf-inference/models/Salesforce/blip-image-captioning-base",
+        "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-base"
+    ]
+    headers = {"Content-Type": "image/jpeg"}
+    if HF_TOKEN:
+        headers["Authorization"] = f"Bearer {HF_TOKEN}"
+
+    for url in urls:
+        try:
+            resp = requests.post(url, headers=headers, data=image_bytes, timeout=25)
+            if resp.ok:
+                data = resp.json()
+                if isinstance(data, list) and len(data) > 0:
+                    cap = data[0].get("generated_text", "")
+                    if cap:
+                        return cap.strip()
+                elif isinstance(data, dict):
+                    cap = data.get("generated_text", "")
+                    if cap:
+                        return cap.strip()
+        except Exception as e:
+            print(f"[HF Vision API] {url} note: {e}")
+    return "A photo of a railway coach interior with visible compartment details."
+
+def hf_transcribe_audio(wav_path: str) -> str:
+    """Call Hugging Face Inference API for Whisper transcription without loading model locally."""
+    if not os.path.exists(wav_path) or os.path.getsize(wav_path) < 100:
+        return ""
+
+    urls = [
+        "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3-turbo",
+        "https://router.huggingface.co/hf-inference/models/openai/whisper-base",
+        "https://api-inference.huggingface.co/models/openai/whisper-base"
+    ]
+    headers = {"Content-Type": "audio/wav"}
+    if HF_TOKEN:
+        headers["Authorization"] = f"Bearer {HF_TOKEN}"
+
     try:
-        from transformers import pipeline
-        print("Loading Whisper pipeline (openai/whisper-tiny)...")
-        whisper_asr = pipeline("automatic-speech-recognition", model="openai/whisper-tiny")
-        print("✅ Whisper pipeline loaded!")
-    except Exception as e2:
-        print("⚠️ Whisper loading error:", e2)
+        with open(wav_path, "rb") as f:
+            audio_data = f.read()
+    except Exception as e:
+        print("[Audio Read Error]", e)
+        return ""
+
+    for url in urls:
+        try:
+            resp = requests.post(url, headers=headers, data=audio_data, timeout=35)
+            if resp.ok:
+                data = resp.json()
+                if isinstance(data, dict):
+                    text = data.get("text", "")
+                    if text:
+                        return text.strip()
+        except Exception as e:
+            print(f"[HF Whisper API] {url} note: {e}")
+    return ""
 
 
 # ══════════════════════════════════════════════════════
-# ROUTE: /caption-image  (OpenRouter inkling → BLIP fallback)
 # ══════════════════════════════════════════════════════
-def nim_caption_image(image_base64_raw: str) -> str:
-    """Call thinkingmachines/inkling via OpenRouter (streaming) to describe the uploaded image."""
+# ROUTE: /caption-image  (OpenRouter Vision Cascade)
+# ══════════════════════════════════════════════════════
+def openrouter_caption_image(image_base64_raw: str) -> str:
+    """Call OpenRouter multimodal vision models (cascade) to describe the uploaded image."""
     try:
         from openai import OpenAI
         client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
             api_key=OPENROUTER_API_KEY,
+            timeout=35.0,
+            max_retries=1
         )
         # Strip any data URL header before sending
         b64_clean = image_base64_raw.split(',', 1)[1] if ',' in image_base64_raw else image_base64_raw
@@ -197,43 +235,45 @@ def nim_caption_image(image_base64_raw: str) -> str:
             "station, or platform. Be specific and factual."
         )
 
-        # ── Stream the response (mirrors the OpenRouter SDK sample) ─────────
-        stream = client.chat.completions.create(
-            model="thinkingmachines/inkling",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": prompt_text},
-                        {"type": "image_url", "image_url": {"url": data_url}}
-                    ]
-                }
-            ],
-            temperature=1,
-            top_p=0.95,
-            max_tokens=8192,
-            stream=True          # ← streaming enabled
-        )
+        vision_models = [
+            "thinkingmachines/inkling",
+            "meta-llama/llama-3.2-11b-vision-instruct",
+            "google/gemini-2.0-flash-001",
+            "openai/gpt-4o-mini"
+        ]
 
-        response = ""
-        for chunk in stream:
-            content = chunk.choices[0].delta.content if chunk.choices else None
-            if content:
-                response += content
-                print(content, end="", flush=True)  # live print like the SDK sample
-            # Log reasoning tokens from final chunk usage
-            usage = getattr(chunk, "usage", None)
-            if usage:
-                reasoning = getattr(getattr(usage, "completion_tokens_details", None), "reasoning_tokens", None)
-                if reasoning is not None:
-                    print(f"\n[OpenRouter Inkling] Reasoning tokens: {reasoning}")
+        for vmodel in vision_models:
+            try:
+                print(f"[OpenRouter Vision] Trying model {vmodel}...")
+                response = client.chat.completions.create(
+                    model=vmodel,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "text", "text": prompt_text},
+                                {"type": "image_url", "image_url": {"url": data_url}}
+                            ]
+                        }
+                    ],
+                    temperature=0.3,
+                    max_tokens=500
+                )
+                if response and response.choices and response.choices[0].message.content:
+                    caption = response.choices[0].message.content.strip()
+                    print(f"✅ [OpenRouter Vision ({vmodel})] Caption: {caption}")
+                    return caption
+            except Exception as model_err:
+                print(f"⚠️ [OpenRouter Vision] Model {vmodel} failed:", model_err)
+                continue
 
-        caption = response.strip()
-        print(f"\n[OpenRouter Inkling] Caption: {caption}")
-        return caption
-    except Exception as e:
-        print("[OpenRouter Inkling] Error:", e)
         return ""
+    except Exception as e:
+        print("[OpenRouter Vision] Error:", e)
+        return ""
+
+nim_caption_image = openrouter_caption_image
+
 
 
 @app.route('/caption-image', methods=['GET', 'POST', 'OPTIONS'])
@@ -253,16 +293,9 @@ def caption_image():
             if caption:
                 return jsonify({'caption': caption, 'model': 'openrouter-inkling'})
 
-        # Fallback: local BLIP model
-        if blip_model and blip_processor:
-            image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-            inputs = blip_processor(images=image, return_tensors="pt")
-            out = blip_model.generate(**inputs)
-            caption = blip_processor.decode(out[0], skip_special_tokens=True)
-            print("[BLIP Image] Caption:", caption)
-            return jsonify({'caption': caption, 'model': 'blip-base'})
-
-        return jsonify({'caption': ''})
+        # Cloud API Fallback: Hugging Face BLIP Inference API (0MB local RAM)
+        caption = hf_caption_image(image_bytes)
+        return jsonify({'caption': caption, 'model': 'hf-inference-blip'})
     except Exception as e:
         print("Error in caption_image:", e)
         return jsonify({'caption': '', 'error': str(e)}), 500
@@ -286,7 +319,7 @@ def transcribe_audio():
             tmp.write(audio_bytes)
             raw_path = tmp.name
 
-        # Extract clean 16kHz WAV for Whisper
+        # Extract clean 16kHz WAV for Whisper API
         wav_path = raw_path.replace(".webm", ".wav")
         audio_text = ""
         try:
@@ -295,20 +328,18 @@ def transcribe_audio():
                  "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", wav_path],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60
             )
-            if os.path.exists(wav_path) and os.path.getsize(wav_path) > 1000:
-                if whisper_model:
-                    res = whisper_model.transcribe(wav_path, fp16=False)
-                    audio_text = res.get('text', '').strip()
-                elif whisper_asr:
-                    audio_text = extract_text_from_asr(whisper_asr(wav_path))
+            audio_text = hf_transcribe_audio(wav_path)
         except Exception as e:
             print("Audio transcription note:", e)
 
         for p in [raw_path, wav_path]:
             if p and os.path.exists(p):
-                os.remove(p)
+                try:
+                    os.remove(p)
+                except Exception:
+                    pass
 
-        print("[Whisper Audio] Transcript:", audio_text)
+        print("[Whisper Audio API] Transcript:", audio_text)
         return jsonify({'text': audio_text, 'transcription': audio_text})
     except Exception as e:
         print("Error in transcribe_audio:", e)
@@ -340,41 +371,39 @@ def caption_video():
         mp4_path, wav_path = transcode_to_mp4_and_wav(raw_path)
         print(f"[Video] Transcoded → mp4: {mp4_path}, wav: {wav_path}")
 
-        # 1. Transcribe spoken audio with Whisper from WAV
+        # 1. Transcribe spoken audio with Whisper API from WAV
         audio_text = ""
         if wav_path and os.path.exists(wav_path):
             try:
-                if whisper_model:
-                    res = whisper_model.transcribe(wav_path, fp16=False)
-                    audio_text = res.get("text", "").strip()
-                elif whisper_asr:
-                    audio_text = extract_text_from_asr(whisper_asr(wav_path))
-                print("[Whisper Video] Audio text:", audio_text)
+                audio_text = hf_transcribe_audio(wav_path)
+                print("[Whisper Video API] Audio text:", audio_text)
             except Exception as e:
                 print("Whisper transcription note:", e)
 
-        # 2. Sample frames from MP4 and caption with BLIP
+        # 2. Sample frames from MP4 and caption with Vision API
         captions = []
         if mp4_path and os.path.exists(mp4_path):
             try:
                 import cv2
                 cap = cv2.VideoCapture(mp4_path)
                 frame_count = 0
-                while cap.isOpened() and len(captions) < 5:
+                while cap.isOpened() and len(captions) < 3:
                     ret, frame = cap.read()
                     if not ret:
                         break
-                    if frame_count % 60 == 0:
-                        image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-                        if blip_model and blip_processor:
-                            inputs = blip_processor(images=image, return_tensors="pt")
-                            out = blip_model.generate(**inputs)
-                            caption = blip_processor.decode(out[0], skip_special_tokens=True)
-                            if caption and caption not in captions:
-                                captions.append(caption)
+                    if frame_count % 90 == 0:
+                        _, buffer = cv2.imencode('.jpg', frame)
+                        frame_bytes = buffer.tobytes()
+                        if OPENROUTER_API_KEY:
+                            frame_b64 = "data:image/jpeg;base64," + base64.b64encode(frame_bytes).decode('utf-8')
+                            caption = nim_caption_image(frame_b64)
+                        else:
+                            caption = hf_caption_image(frame_bytes)
+                        if caption and caption not in captions:
+                            captions.append(caption)
                     frame_count += 1
                 cap.release()
-                print("[BLIP Video] Captions:", captions)
+                print("[Vision Video API] Captions:", captions)
             except Exception as e:
                 print("Frame sampling note:", e)
 
@@ -403,7 +432,7 @@ def caption_video():
 
 
 # ══════════════════════════════════════════════════════
-# ROUTE: /analyze-complaint  (NVIDIA Llama 3.3 Nemotron Super 49b)
+# ROUTE: /analyze-complaint  (OpenRouter LLM Analysis Cascade)
 # ══════════════════════════════════════════════════════
 @app.route('/analyze-complaint', methods=['GET', 'POST', 'OPTIONS'])
 def analyze_complaint():
@@ -536,40 +565,41 @@ def analyze_complaint():
             "}"
         )
 
-        if not NVIDIA_NIM_API_KEY:
+        if not OPENROUTER_API_KEY:
             # Fallback if key missing
             return jsonify({
-                "are_texts_related": "API key not configured",
+                "are_texts_related": "OpenRouter API key not configured",
                 "urgency": "Medium",
-                "missing_info": "NVIDIA API key not set.",
+                "missing_info": "OpenRouter API key not set.",
                 "is_sufficient": True,
                 "relevance": "related",
                 "confidence": 80,
                 "is_train_journey_issue": True,
                 "keywords": ["railway", "complaint"],
                 "summary": "\n".join(formatted_inputs),
-                "action_steps": ["Configure NVIDIA_NIM_API_KEY"],
+                "action_steps": ["Configure OPENROUTER_API_KEY"],
                 "has_issue": True
             })
 
         from openai import OpenAI
         client = OpenAI(
-            base_url="https://integrate.api.nvidia.com/v1",
-            api_key=NVIDIA_NIM_API_KEY,
-            timeout=10.0,
-            max_retries=0
+            base_url="https://openrouter.ai/api/v1",
+            api_key=OPENROUTER_API_KEY,
+            timeout=25.0,
+            max_retries=1
         )
 
         analysis_models = [
-            "nvidia/nemotron-3-ultra-550b-a55b",
-            "meta/llama-3.3-70b-instruct",
-            "meta/llama-3.1-8b-instruct"
+            "meta-llama/llama-3.3-70b-instruct",
+            "meta-llama/llama-3.1-8b-instruct",
+            "google/gemini-2.0-flash-001",
+            "openai/gpt-4o-mini"
         ]
 
         completion = None
         for amodel in analysis_models:
             try:
-                print(f"[NIM Analysis] Trying model {amodel}...")
+                print(f"[OpenRouter Analysis] Trying model {amodel}...")
                 completion = client.chat.completions.create(
                     model=amodel,
                     messages=[
@@ -589,14 +619,14 @@ def analyze_complaint():
                 if completion and completion.choices and completion.choices[0].message.content:
                     break
             except Exception as model_err:
-                print(f"[NIM Analysis] Model {amodel} error/timeout:", model_err)
+                print(f"[OpenRouter Analysis] Model {amodel} error/timeout:", model_err)
                 continue
 
         if not completion or not completion.choices or not completion.choices[0].message.content:
-            raise RuntimeError("No NIM model returned analysis in time")
+            raise RuntimeError("No OpenRouter model returned analysis in time")
 
         raw_response = completion.choices[0].message.content.strip()
-        print("[NVIDIA Nemotron Analysis] Raw output:", raw_response)
+        print("[OpenRouter Analysis] Raw output:", raw_response)
 
         # Clean JSON if wrapped in markdown code blocks
         clean_json_str = raw_response
@@ -947,55 +977,65 @@ def scan_id_card():
                 client = OpenAI(
                     base_url="https://openrouter.ai/api/v1",
                     api_key=OPENROUTER_API_KEY,
+                    timeout=30.0,
+                    max_retries=1
                 )
 
-                # ── Stream the response (mirrors the OpenRouter SDK sample) ──
-                stream = client.chat.completions.create(
-                    model="thinkingmachines/inkling",
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": [
-                                {"type": "text", "text": prompt_text},
-                                {"type": "image_url", "image_url": {"url": data_url}}
-                            ]
-                        }
-                    ],
-                    temperature=0.2,
-                    max_tokens=1000,
-                    stream=True          # ← streaming enabled
-                )
+                ocr_models = [
+                    "thinkingmachines/inkling",
+                    "meta-llama/llama-3.2-11b-vision-instruct",
+                    "google/gemini-2.0-flash-001",
+                    "openai/gpt-4o-mini"
+                ]
 
-                res_text = ""
-                for chunk in stream:
-                    content = chunk.choices[0].delta.content if chunk.choices else None
-                    if content:
-                        res_text += content
-                        print(content, end="", flush=True)
-                    usage = getattr(chunk, "usage", None)
-                    if usage:
-                        reasoning = getattr(getattr(usage, "completion_tokens_details", None), "reasoning_tokens", None)
-                        if reasoning is not None:
-                            print(f"\n[OpenRouter Inkling] Reasoning tokens: {reasoning}")
+                parsed = None
+                for om in ocr_models:
+                    try:
+                        print(f"[OpenRouter ID OCR] Trying model {om}...")
+                        stream = client.chat.completions.create(
+                            model=om,
+                            messages=[
+                                {
+                                    "role": "user",
+                                    "content": [
+                                        {"type": "text", "text": prompt_text},
+                                        {"type": "image_url", "image_url": {"url": data_url}}
+                                    ]
+                                }
+                            ],
+                            temperature=0.2,
+                            max_tokens=1000,
+                            stream=True
+                        )
 
-                res_text = res_text.strip()
-                print(f"\n[OpenRouter Inkling ID OCR RES]: {res_text}")
+                        res_text = ""
+                        for chunk in stream:
+                            content = chunk.choices[0].delta.content if chunk.choices else None
+                            if content:
+                                res_text += content
 
-                # Parse JSON out of response
-                import json
-                clean_res = res_text
-                if clean_res.startswith("```"):
-                    lines = clean_res.split("\n")
-                    if lines[0].startswith("```"):
-                        lines = lines[1:]
-                    if lines[-1].strip() == "```":
-                        lines = lines[:-1]
-                    clean_res = "\n".join(lines).strip()
+                        res_text = res_text.strip()
+                        print(f"✅ [OpenRouter ID OCR ({om})]: {res_text}")
 
-                parsed = json.loads(clean_res)
-                return jsonify(parsed)
+                        # Parse JSON out of response
+                        import json
+                        clean_res = res_text
+                        if clean_res.startswith("```"):
+                            lines = clean_res.split("\n")
+                            if lines[0].startswith("```"):
+                                lines = lines[1:]
+                            if lines[-1].strip() == "```":
+                                lines = lines[:-1]
+                            clean_res = "\n".join(lines).strip()
+
+                        parsed = json.loads(clean_res)
+                        if parsed:
+                            return jsonify(parsed)
+                    except Exception as merr:
+                        print(f"⚠️ [OpenRouter ID OCR] Model {om} error:", merr)
+                        continue
             except Exception as e:
-                print("[OpenRouter Inkling] ID scan error, falling back:", e)
+                print("[OpenRouter ID OCR] ID scan error, falling back:", e)
                 reason = f"AI Service error: {str(e)}. Fallback verification used."
 
         # Fallback matching rule

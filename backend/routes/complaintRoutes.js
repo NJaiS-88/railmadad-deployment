@@ -40,7 +40,7 @@ router.post('/', authMiddleware, async (req, res) => {
     const audioText = aiConversions?.audioText || '';
     const videoText = aiConversions?.videoText || '';
 
-    // ALWAYS execute NVIDIA Nemotron LLM Analysis on submission regardless of input combination
+    // ALWAYS execute OpenRouter LLM Analysis on submission regardless of input combination
     let llmAnalysis = req.body.llmAnalysis || null;
     if (!llmAnalysis) {
       try {

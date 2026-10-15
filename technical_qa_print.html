@@ -175,10 +175,10 @@ coach_match = (edit_dist == 0)</code></pre>
 
 <h4>B) Staff ID Card OCR</h4>
 <p>File: <code>ml_service.py</code> → <code>/scan-id-card</code> endpoint</p>
-<p>Uses <strong>NVIDIA NIM vision model (<code>thinkingmachines/inkling</code>)</strong> — it reads the Railway ID card photo, extracts the employee's name, and compares it to the typed name. Returns <code>detected_name</code>, <code>match</code>, <code>confidence</code>, and <code>reason</code>. Fallback: if NIM is offline, it approves with 70% confidence.</p>
+<p>Uses <strong>OpenRouter AI vision cascade (<code>thinkingmachines/inkling</code>, <code>meta-llama/llama-3.2-11b-vision-instruct</code>, <code>google/gemini-2.0-flash-001</code>)</strong> — it reads the Railway ID card photo, extracts the employee's name, and compares it to the typed name. Returns <code>detected_name</code>, <code>match</code>, <code>confidence</code>, and <code>reason</code>. Fallback: if AI is offline, it approves with 70% confidence.</p>
 
 <h3>Why not Tesseract?</h3>
-<p>Tesseract requires system binary installation and struggles with printed railway coach fonts and skewed/outdoor photos. The NVIDIA NIM vision model is far more robust for real-world images. The coach OCR tool is architected with a sidecar <code>.txt</code> file slot specifically so a real Tesseract integration can be plugged in later without changing any other code.</p>
+<p>Tesseract requires system binary installation and struggles with printed railway coach fonts and skewed/outdoor photos. The OpenRouter multimodal vision models are far more robust for real-world images. The coach OCR tool is architected with a sidecar <code>.txt</code> file slot specifically so a real Tesseract integration can be plugged in later without changing any other code.</p>
 
 <hr>
 
@@ -187,7 +187,7 @@ coach_match = (edit_dist == 0)</code></pre>
 <p>A score from <strong>0–100</strong> representing how certain the AI is that it fully understands the complaint and can route it correctly <strong>without a human officer</strong>.</p>
 
 <h3>How the AI decides it (the exact prompt)</h3>
-<p>The LLM (<code>nvidia/nemotron-3-ultra-550b-a55b</code>) is given these <strong>exact calibration instructions</strong> in <code>ml_service.py</code>:</p>
+<p>The LLM (OpenRouter <code>meta-llama/llama-3.3-70b-instruct</code>) is given these <strong>exact calibration instructions</strong> in <code>ml_service.py</code>:</p>
 
 <pre><code>"CRITICAL INSTRUCTIONS FOR 'confidence':
 - Include an explicit integer 'confidence' from 0 to 100.
@@ -297,7 +297,7 @@ subprocess.run([FFMPEG_EXE, "-y", "-i", raw_path,
     <tr><td><strong>Confidence calibration</strong></td><td>Track: when AI says 90% confidence, is it actually correct 90% of the time? Use Platt scaling to recalibrate</td></tr>
     <tr><td><strong>Real Tesseract OCR</strong></td><td>Replace the sidecar <code>.txt</code> mock with actual Tesseract + image pre-processing (deskew, contrast boost) for coach number reading</td></tr>
     <tr><td><strong>Semantic clustering (DICE v2)</strong></td><td>Replace <code>category+train</code> key with sentence embeddings. Use <code>all-MiniLM-L6-v2</code> to find semantically similar complaints even if they use different words</td></tr>
-    <tr><td><strong>Train a custom classifier</strong></td><td>After collecting 1000+ labeled complaints, fine-tune a small BERT model specifically on Indian Railways complaint categories — faster and cheaper than calling NVIDIA NIM every time</td></tr>
+    <tr><td><strong>Train a custom classifier</strong></td><td>After collecting 1000+ labeled complaints, fine-tune a small BERT model specifically on Indian Railways complaint categories — faster and cheaper than calling cloud LLMs every time</td></tr>
     <tr><td><strong>Active learning</strong></td><td>When AI confidence is 60–75%, show these to officers AND record their decision. Feed confirmed labels back to training</td></tr>
     <tr><td><strong>Multilingual whisper</strong></td><td>Switch from <code>whisper-base</code> to <code>whisper-large-v3</code> which handles Hindi, Tamil, Telugu, Bengali natively</td></tr>
     <tr><td><strong>Hotspot ML model</strong></td><td>Replace the current count-threshold hotspot detection with a time-series anomaly model (e.g., Prophet or ARIMA) to predict maintenance needs BEFORE complaints spike</td></tr>

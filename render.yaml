@@ -34,14 +34,14 @@ services:
   - type: web
     name: railmadad-ml-service
     runtime: docker
-    plan: starter
+    plan: free
     dockerfilePath: ./Dockerfile.ml
     dockerContext: .
     healthCheckPath: /health
     envVars:
-      - key: NVIDIA_NIM_API_KEY
-        sync: false
       - key: OPENROUTER_API_KEY
+        sync: false
+      - key: HF_TOKEN
         sync: false
       - key: RAILRADAR_API_KEY
         sync: false

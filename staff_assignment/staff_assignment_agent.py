@@ -8,7 +8,7 @@ Takes the OUTPUT of the Classification Agent as input:
   location, urgency, required_action, action_steps,
   confidence, reason, escalation_required
 
-Uses NVIDIA NIM (Llama-3.3 Nemotron) with OpenAI tool-calling
+Uses OpenRouter AI (Llama-3.3 70B cascade) with OpenAI tool-calling
 to dynamically select and assign the best-fit staff member.
 
 Modes:
@@ -38,14 +38,14 @@ try:
 except ImportError:
     pass
 
-API_BASE_URL = "https://integrate.api.nvidia.com/v1"
-API_KEY = (
-    os.getenv("NVIDIA_NIM_API_KEY", "").strip()
-    or os.getenv("NEMOTRON_API_KEY", "").strip()
-)
+API_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+API_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
 
 MODELS: List[str] = [
-    "nvidia/nemotron-3-ultra-550b-a55b",
+    "meta-llama/llama-3.3-70b-instruct",
+    "meta-llama/llama-3.1-8b-instruct",
+    "google/gemini-2.0-flash-001",
+    "openai/gpt-4o-mini"
 ]
 
 
@@ -163,7 +163,7 @@ ASSIGNMENT_TOOLS: List[Dict] = [
 
 # ── System Prompt ────────────────────────────────────────────────────────────
 
-SYSTEM_PROMPT = """You are the Staff Assignment Agent in the Rail Madad AI pipeline for Indian Railways powered exclusively by NVIDIA Nemotron.
+SYSTEM_PROMPT = """You are the Staff Assignment Agent in the Rail Madad AI pipeline for Indian Railways powered by OpenRouter AI.
 
 You receive:
 1. A CLASSIFIED COMPLAINT with:
@@ -515,7 +515,7 @@ def assign_staff(
         }
 
     if not API_KEY:
-        raise ValueError("NVIDIA_NIM_API_KEY environment variable is required to run the Staff Assignment Agent.")
+        raise ValueError("OPENROUTER_API_KEY environment variable is required to run the Staff Assignment Agent.")
 
     # ── LLM agentic loop ─────────────────────────────────────────────────────
     client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY, timeout=30.0, max_retries=0)
@@ -640,7 +640,7 @@ def assign_staff(
         return {
             "status": "unassigned",
             "reason": f"All AI models failed to process staff assignment. Error: {last_error}",
-            "recommended_action": "Check NVIDIA NIM API status or network connectivity.",
+            "recommended_action": "Check OpenRouter API status or network connectivity.",
         }
 
     # ── Enrich and normalise ─────────────────────────────────────────────────
@@ -954,7 +954,7 @@ def complaint_to_classification(complaint: Dict[str, Any]) -> Dict[str, Any]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Rail Madad Staff Assignment Agent - NVIDIA NIM Llama-3.3 Nemotron"
+        description="Rail Madad Staff Assignment Agent - OpenRouter AI"
     )
     parser.add_argument(
         "--input",

@@ -20,19 +20,17 @@ except ImportError:
 
 
 
-API_BASE_URL = "https://integrate.api.nvidia.com/v1"
+API_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 
-# Prefer the shared NVIDIA_NIM_API_KEY used across the project; fallback to NEMOTRON_API_KEY
-API_KEY = (
-    os.getenv("NVIDIA_NIM_API_KEY", "").strip()
-    or os.getenv("NEMOTRON_API_KEY", "").strip()
-)
+# Use OPENROUTER_API_KEY
+API_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
 
-# Model cascade — most capable first
+# OpenRouter model cascade
 MODELS: List[str] = [
-    "nvidia/nemotron-3-ultra-550b-a55b",
-    "meta/llama-3.3-70b-instruct",
-    "meta/llama-3.1-8b-instruct",
+    "meta-llama/llama-3.3-70b-instruct",
+    "meta-llama/llama-3.1-8b-instruct",
+    "google/gemini-2.0-flash-001",
+    "openai/gpt-4o-mini"
 ]
 
 # ── Tool definitions for the agent loop ──────────────────────────────────────
@@ -476,13 +474,13 @@ def classify_complaint(payload: Dict[str, Any]) -> Dict[str, Any]:
             "sub_department": "",
             "location": _str(payload.get("location") or "Not specified"),
             "urgency": "medium",
-            "required_action": "Configure NVIDIA_NIM_API_KEY in .env to enable AI classification.",
-            "action_steps": ["Set NVIDIA_NIM_API_KEY environment variable."],
+            "required_action": "Configure OPENROUTER_API_KEY in environment to enable AI classification.",
+            "action_steps": ["Set OPENROUTER_API_KEY environment variable."],
             "confidence": 0.0,
-            "reason": "NVIDIA NIM API key not configured.",
+            "reason": "OpenRouter API key not configured.",
             "escalation_required": False,
             "manual_review_required": True,
-            "error": "NVIDIA_NIM_API_KEY not set",
+            "error": "OPENROUTER_API_KEY not set",
         }
 
     client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY, timeout=30.0, max_retries=0)
@@ -912,7 +910,7 @@ def create_app():
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Railway Complaint Classification Agent — NVIDIA NIM Llama-3.3 Nemotron"
+        description="Railway Complaint Classification Agent — OpenRouter AI"
     )
     parser.add_argument(
         "--input",

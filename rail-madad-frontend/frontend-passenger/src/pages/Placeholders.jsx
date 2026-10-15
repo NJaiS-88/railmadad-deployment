@@ -504,7 +504,7 @@ export function Track() {
                   <div className="bg-white rounded-xl p-3 border border-blue-100 space-y-1">
                     <div className="flex items-center space-x-1.5">
                       <Camera className="w-3.5 h-3.5 text-primary" />
-                      <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Image → Text (NVIDIA NIM Inkling)</span>
+                      <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Image → Text (OpenRouter AI Vision)</span>
                     </div>
                     <p className="text-xs text-slate-800 font-medium leading-relaxed whitespace-pre-line">{foundComplaint.aiConversions.imageText}</p>
                   </div>

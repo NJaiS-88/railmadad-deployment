@@ -89,7 +89,6 @@ MONGO_URI=mongodb://mongodb:27017/railmadad
 JWT_SECRET=use_a_long_random_secure_key_here
 
 # AI Models
-NVIDIA_NIM_API_KEY=nvapi-your-key-here
 OPENROUTER_API_KEY=sk-or-v1-your-key-here
 HF_TOKEN=hf_your_key_here
 RAILRADAR_API_KEY=rg_your_key_here
@@ -264,7 +263,7 @@ Each service can be deployed independently:
    - Env Vars: `MONGO_URI`, `JWT_SECRET`, `ML_SERVICE_URL`
 2. **ML Service**:
    - Dockerfile: `Dockerfile.ml`
-   - Env Vars: `NVIDIA_NIM_API_KEY`, `OPENROUTER_API_KEY`
+   - Env Vars: `OPENROUTER_API_KEY`, `HF_TOKEN`
 3. **Frontends (Vercel / Netlify / Render Static)**:
    - Root directory: `rail-madad-frontend/frontend-passenger` (or officer/staff)
    - Build command: `npm run build`

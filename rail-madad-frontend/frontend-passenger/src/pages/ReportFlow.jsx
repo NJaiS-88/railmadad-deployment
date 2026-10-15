@@ -126,7 +126,7 @@ export default function ReportFlow() {
     video: false,
   });
 
-  // Structured LLM Multi-Modal Analysis State (NVIDIA Nemotron Super 49B)
+  // Structured LLM Multi-Modal Analysis State (OpenRouter AI)
   const [llmAnalysis, setLlmAnalysis] = useState(null);
   const [analyzingLlm, setAnalyzingLlm] = useState(false);
 
@@ -216,7 +216,7 @@ export default function ReportFlow() {
     `${API_BASE}/complaints`;
   const HF_TOKEN = import.meta.env.VITE_HF_TOKEN || "";
 
-  // 1. Image to Text using NVIDIA NIM Inkling / BLIP Model (Python ML Service & API endpoint)
+  // 1. Image to Text using OpenRouter AI Vision / BLIP Model (Python ML Service & API endpoint)
   async function generateImageCaption(imageBase64) {
     if (!imageBase64) return "";
 

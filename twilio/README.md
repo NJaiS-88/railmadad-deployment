@@ -18,7 +18,7 @@ Twilio sends recording URL → /voice/process
         ├── Recording audio ──► Whisper (ml_service.py /transcribe-audio)
         │                        └── Transcript text
         │
-        ├── Transcript ──────► NVIDIA Nemotron Super 49B
+        ├── Transcript ──────► OpenRouter AI (Llama 3.3 70B)
         │                        └── {next_question, is_complete, collected}
         │
         ├── If NOT complete → TwiML: Say next_question + Record again

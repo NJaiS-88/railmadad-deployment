@@ -3,7 +3,7 @@
 This folder contains the AI Classification Agent in the Rail Madad complaint workflow.
 
 ## Purpose
-The agent evaluates dynamic passenger complaint data and uses NVIDIA NIM (Llama-3.3 Nemotron) to classify the issue into railway operations categories and departments:
+The agent evaluates dynamic passenger complaint data and uses OpenRouter AI (Llama-3.3 70B cascade) to classify the issue into railway operations categories and departments:
 - Mechanical
 - Electrical
 - Commercial/Catering

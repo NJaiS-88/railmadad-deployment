@@ -6,7 +6,7 @@ An end-to-end AI-integrated Railway Grievance Redressal and Assistance Platform 
 
 ## 🌟 Key Features
 
-- **📷 Image → Text AI**: Powered by **NVIDIA NIM LLM Vision (`thinkingmachines/inkling`)** with local Salesforce BLIP fallback.
+- **📷 Image → Text AI**: Powered by **OpenRouter AI Multimodal Vision** with cloud API fallback.
 - **🎙️ Audio → Text AI**: Powered by **OpenAI Whisper ASR** for automatic speech recognition.
 - **🎥 Multimodal Video AI**: Automatic audio transcription + visual scene captioning using FFmpeg transcoding pipelines.
 - **🎫 Real-time Tracking & Staff Management**: Integrated Express/MongoDB backend for tracking ticket statuses and staff resolution proof uploads.
@@ -49,7 +49,7 @@ RailMadad/
    PORT=5000
    MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret_key
-   NVIDIA_NIM_API_KEY=nvapi-your-nvidia-nim-api-key
+   OPENROUTER_API_KEY=your_openrouter_api_key_here
    ```
 
 ---
@@ -122,7 +122,7 @@ Verify that `.env` is **NOT** listed in untracked files. Then commit and push:
 
 ```bash
 git add .
-git commit -m "feat: complete multimodal Rail Madad platform with NVIDIA NIM Inkling & Whisper AI"
+git commit -m "feat: complete multimodal Rail Madad platform with OpenRouter AI & Whisper ASR"
 git branch -M main
 git remote add origin https://github.com/<your-username>/RailMadad.git
 git push -u origin main

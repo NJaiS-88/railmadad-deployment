@@ -12,7 +12,7 @@ AI-powered Twilio WhatsApp bot for Indian Railways passenger grievance registrat
    - Automatically links the complaint to the passenger's registered Rail Madad account by mobile number.
    - Generates official `RMDA...` Complaint IDs.
 3. **Asynchronous AI Triage Analysis**:
-   - Runs NVIDIA NIM AI triage models (`meta/llama-3.1-8b-instruct`) to generate AI decision reasoning, category, and severity assessment.
+   - Runs OpenRouter AI triage models (`meta-llama/llama-3.1-8b-instruct`) to generate AI decision reasoning, category, and severity assessment.
 4. **Rich WhatsApp Formatting**:
    - Returns structured WhatsApp messages formatted with bold, emojis, and code blocks for Complaint IDs.
 
@@ -25,7 +25,7 @@ Ensure `.env` in the project root contains:
 ```env
 TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=your_auth_token_here
-NVIDIA_NIM_API_KEY=nvapi-your-key-here
+OPENROUTER_API_KEY=sk-or-your-key-here
 TWILIO_WHATSAPP_PORT=6001
 BACKEND_API_URL=http://127.0.0.1:5000/api
 ML_SERVICE_URL=http://127.0.0.1:8000

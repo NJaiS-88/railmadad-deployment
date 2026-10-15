@@ -41,15 +41,17 @@ except ImportError:
     pass
 
 def generate_explanation(train_number, entered_coach, location_match, distance_km, coach_match, detected_coach, suspicion_score, risk_level, reasons):
-    nvidia_api_key = os.environ.get("NVIDIA_NIM_API_KEY", "").strip() or os.environ.get("NEMOTRON_API_KEY", "").strip()
-    if not nvidia_api_key:
+    api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
+    if not api_key:
         return f"Verification check completed with risk level {risk_level}. " + " ".join(reasons)
         
     try:
         from openai import OpenAI
         client = OpenAI(
-            base_url="https://integrate.api.nvidia.com/v1",
-            api_key=nvidia_api_key
+            base_url="https://openrouter.ai/api/v1",
+            api_key=api_key,
+            timeout=25.0,
+            max_retries=1
         )
         
         prompt = VERIFICATION_EXPLANATION_PROMPT.format(
@@ -64,20 +66,33 @@ def generate_explanation(train_number, entered_coach, location_match, distance_k
             reasons=", ".join(reasons)
         )
         
-        completion = client.chat.completions.create(
-            model="nvidia/nemotron-3-ultra-550b-a55b",
-            messages=[
-                {"role": "system", "content": "You are a professional railway safety verification officer. Write concise explanations."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.3,
-            max_tokens=256
-        )
+        models = [
+            "meta-llama/llama-3.3-70b-instruct",
+            "meta-llama/llama-3.1-8b-instruct",
+            "google/gemini-2.0-flash-001",
+            "openai/gpt-4o-mini"
+        ]
         
-        explanation = completion.choices[0].message.content.strip()
-        return explanation
+        for m in models:
+            try:
+                completion = client.chat.completions.create(
+                    model=m,
+                    messages=[
+                        {"role": "system", "content": "You are a professional railway safety verification officer. Write concise explanations."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.3,
+                    max_tokens=256
+                )
+                if completion and completion.choices and completion.choices[0].message.content:
+                    return completion.choices[0].message.content.strip()
+            except Exception as merr:
+                print(f"Warning: Model {m} failed for verification explanation:", merr)
+                continue
+                
+        return f"Verification check completed with risk level {risk_level}. " + " ".join(reasons)
     except Exception as e:
-        print("Warning: Failed to generate LLM explanation:", e)
+        print("Warning: Failed to generate OpenRouter LLM explanation:", e)
         return f"Verification check completed with risk level {risk_level}. " + " ".join(reasons)
 
 def verify_complaint_evidence(image_path, train_number, coach, query_timestamp=None):

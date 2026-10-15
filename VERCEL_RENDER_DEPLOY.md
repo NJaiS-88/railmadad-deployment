@@ -11,7 +11,7 @@ This simple, step-by-step guide will walk you through deploying:
 Before you begin, have these ready:
 1. **GitHub Repository**: Push your RailMadad project code to GitHub.
 2. **MongoDB Atlas URI**: Your cloud MongoDB connection string (e.g., `mongodb+srv://user:pass@cluster.mongodb.net/railmadad`).
-3. **NVIDIA NIM & OpenRouter API Keys**: (From your `.env` file).
+3. **OpenRouter API Key**: (From your `.env` file).
 4. Free accounts on **[Render.com](https://render.com)** and **[Vercel.com](https://vercel.com)**.
 
 ---
@@ -32,8 +32,7 @@ You have two easy ways to deploy on Render. **Method A (Blueprint)** is one clic
    - `railmadad-backend` (Node.js API)
 5. Fill in the prompted secret variables:
    - `MONGO_URI`: Your MongoDB Atlas URI.
-   - `NVIDIA_NIM_API_KEY`: Your NVIDIA NIM key.
-   - `OPENROUTER_API_KEY`: Your OpenRouter key.
+   - `OPENROUTER_API_KEY`: Your OpenRouter key (e.g. `sk-or-v1-...`).
 6. Click **Apply**.
 7. Once deployed, note your two service URLs:
    - Backend URL: e.g. `https://railmadad-backend.onrender.com`
@@ -54,8 +53,7 @@ You have two easy ways to deploy on Render. **Method A (Blueprint)** is one clic
    - **Instance Type**: `Starter` (or `Free`)
 4. Under **Environment Variables**, add:
    - `PORT` = `8000`
-   - `NVIDIA_NIM_API_KEY` = your key
-   - `OPENROUTER_API_KEY` = your key
+   - `OPENROUTER_API_KEY` = your OpenRouter key (`sk-or-v1-...`)
 5. Click **Create Web Service**.
 6. When deployment finishes, copy its public URL:
    `https://railmadad-ml-service.onrender.com`

@@ -71,7 +71,6 @@ services:
       - "${ML_PORT:-8000}:8000"
     environment:
       PORT: 8000
-      NVIDIA_NIM_API_KEY: ${NVIDIA_NIM_API_KEY:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       RAILRADAR_API_KEY: ${RAILRADAR_API_KEY:-}
     networks:
@@ -97,7 +96,7 @@ services:
     environment:
       PORT: 8001
       MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/railmadad}
-      NVIDIA_NIM_API_KEY: ${NVIDIA_NIM_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       STAFF_ASSIGNMENT_URL: http://staff-assignment-agent:8002/assign-staff
     depends_on:
       mongodb:
@@ -125,7 +124,7 @@ services:
     environment:
       PORT: 8002
       MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/railmadad}
-      NVIDIA_NIM_API_KEY: ${NVIDIA_NIM_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
     depends_on:
       mongodb:
         condition: service_healthy
@@ -235,7 +234,7 @@ services:
       TWILIO_BASE_URL: ${TWILIO_BASE_URL:-}
       BACKEND_API_URL: http://backend:5000/api
       ML_SERVICE_URL: http://ml-service:8000
-      NVIDIA_NIM_API_KEY: ${NVIDIA_NIM_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
     networks:
       - railmadad-network
 
@@ -255,7 +254,7 @@ services:
       TWILIO_WHATSAPP_NUMBER: ${TWILIO_WHATSAPP_NUMBER:-}
       BACKEND_API_URL: http://backend:5000/api
       ML_SERVICE_URL: http://ml-service:8000
-      NVIDIA_NIM_API_KEY: ${NVIDIA_NIM_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
     networks:
       - railmadad-network
 
