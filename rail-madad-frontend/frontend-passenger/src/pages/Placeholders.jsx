@@ -695,7 +695,9 @@ export function Track() {
                   <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase border ${
                     foundComplaint.evidenceVerification.verification_status === 'VERIFIED'
                       ? 'bg-green-50 text-green-700 border-green-200'
-                      : 'bg-red-50 text-red-700 border-red-200'
+                      : foundComplaint.evidenceVerification.verification_status === 'UNVERIFIED'
+                        ? 'bg-amber-50 text-amber-700 border-amber-200'
+                        : 'bg-red-50 text-red-700 border-red-200'
                   }`}>
                     {foundComplaint.evidenceVerification.verification_status || 'VERIFIED'}
                   </span>
@@ -716,7 +718,7 @@ export function Track() {
                     <p className="text-slate-800 font-semibold">
                       {foundComplaint.evidenceVerification.distance_km != null 
                         ? `${foundComplaint.evidenceVerification.distance_km.toFixed(2)} km from live train path`
-                        : 'No EXIF GPS timestamp mismatch detected'}
+                        : 'Photo has no GPS data, so location was not checked'}
                     </p>
                   </div>
 

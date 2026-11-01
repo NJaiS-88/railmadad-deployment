@@ -68,7 +68,15 @@ const ComplaintSchema = new mongoose.Schema({
     keywords: [String],
     summary: mongoose.Schema.Types.Mixed,
     action_steps: [String],
-    has_issue: Boolean
+    has_issue: Boolean,
+    relevance: String,
+    confidence: Number,
+    is_train_journey_issue: Boolean,
+    media_matches_complaint: Boolean
+  },
+  manual_review_required: {
+    type: Boolean,
+    default: false
   },
   location: {
     lat: String,

@@ -513,6 +513,11 @@ def analyze_complaint():
             "- Set it TRUE only when you are CERTAIN the complaint is about a genuine Indian Railways train journey experience (e.g. AC/coach fault, toilet cleanliness, food/catering quality, staff behaviour on the train, train delay, ticketing, station platform safety).\n"
             "- Set it FALSE when the issue only loosely touches railways, uses common or adjacent terms, or could apply to any public transport or service — being 'close' or 'related-sounding' is NOT enough.\n"
             "- When in doubt, set it FALSE — auto-verification must happen ONLY when you are sure it is a train journey issue.\n\n"
+            "CRITICAL INSTRUCTIONS FOR 'media_matches_complaint':\n"
+            "- Include 'media_matches_complaint' as true, false, or null.\n"
+            "- null ONLY when image_description and video_transcript are both NONE.\n"
+            "- true when the attached photo/video shows a railway scene consistent with the described problem.\n"
+            "- false when the attached photo/video shows something unrelated to the complaint (e.g. a cartoon, animal, logo, selfie, random graphic, a non-railway place) or contradicts it. An unrelated photo is suspicious evidence even if the text complaint is clear.\n\n"
             "CRITICAL INSTRUCTIONS FOR 'is_sufficient' (REVISED):\n"
             "- Judge for yourself whether the provided information is decently sufficient to identify and understand the basic context of the issue so staff could be dispatched.\n"
             "- Set 'is_sufficient': true when most key details are provided and the issue is clearly described enough to act on (e.g. 'AC not working in coach B4').\n"
@@ -550,6 +555,7 @@ def analyze_complaint():
             '  "relevance": "related",\n'
             '  "confidence": 88,\n'
             '  "is_train_journey_issue": true,\n'
+            '  "media_matches_complaint": true,\n'
             '  "keywords": ["Keyword 1", "Keyword 2", "Keyword 3", "Keyword 4", "Keyword 5"],\n'
             '  "summary": {\n'
             '    "Primary Complaint Overview": "Thorough detailed breakdown of the main issue reported...",\n'
@@ -613,7 +619,7 @@ def analyze_complaint():
                         }
                     ],
                     temperature=0.3,
-                    max_tokens=2048,
+                    max_tokens=4096,
                     stream=False
                 )
                 if completion and completion.choices and completion.choices[0].message.content:
@@ -822,10 +828,19 @@ def analyze_complaint():
             # self-doubt. Anything merely 'close' or related-sounding, or with
             # any doubt, goes to manual officer review.
             journey_certain = structured_analysis.get("is_train_journey_issue") is True
-            if suff and confidence >= 85 and not llm_doubt and journey_certain:
+            media_mismatch = (
+                bool((image_input or "").strip() or (video_input or "").strip())
+                and structured_analysis.get("media_matches_complaint") is False
+            )
+            if suff and confidence >= 85 and not llm_doubt and journey_certain and not media_mismatch:
                 structured_analysis["requires_manual_officer_review"] = False
                 structured_analysis["missing_questions"] = []
             elif suff:
+                if media_mismatch:
+                    structured_analysis["decision_reasoning"] = (
+                        str(structured_analysis.get("decision_reasoning") or "").strip()
+                        + " The attached photo/video does not match the complaint, so it was sent for officer review."
+                    ).strip()
                 # decent details but the issue is only 'close' to journeys,
                 # confidence is low, or the LLM has self-doubt → manual flagging
                 structured_analysis["requires_manual_officer_review"] = True
@@ -907,9 +922,11 @@ def verify_evidence():
         if image_base64:
             image_bytes = decode_base64_safely(image_base64)
             if image_bytes:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
+                # Fixed filename: the OCR tool reads coach numbers from filenames,
+                # so a random temp name like "tmp_q7x.jpg" could produce a false match.
+                tmp_path = os.path.join(tempfile.mkdtemp(), "evidence.jpg")
+                with open(tmp_path, "wb") as tmp:
                     tmp.write(image_bytes)
-                    tmp_path = tmp.name
             
         try:
             # Run verification agent
@@ -921,9 +938,8 @@ def verify_evidence():
             )
             return jsonify(response_obj.model_dump())
         finally:
-            # Cleanup temp file if created
-            if tmp_path and os.path.exists(tmp_path):
-                os.remove(tmp_path)
+            if tmp_path:
+                shutil.rmtree(os.path.dirname(tmp_path), ignore_errors=True)
                 
     except Exception as e:
         print("Error in verify_evidence endpoint:", e)

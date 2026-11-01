@@ -46,6 +46,11 @@ def calculate_suspicion(location_available, location_match, coach_available, coa
         verification_status = "SUSPICIOUS"
         human_review_required = True
         reasons.append("Medium suspicion (Score 1): One verification signal fired. Flagged for officer review.")
+    elif not location_available and not (coach_available and coach_match is not None):
+        risk_level = "Green"
+        verification_status = "UNVERIFIED"
+        human_review_required = False
+        reasons.append("No verifiable signals (no photo GPS, no readable coach number): evidence could not be cross-checked.")
     else:
         risk_level = "Green"
         verification_status = "VERIFIED"

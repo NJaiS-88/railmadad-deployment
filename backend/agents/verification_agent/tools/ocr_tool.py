@@ -44,16 +44,6 @@ def extract_coach_number(image_path, entered_coach=None):
             except Exception:
                 pass
 
-    # 3. Default fallback mock rules
-    if not detected_coach:
-        if entered_coach:
-            if entered_coach.upper() == 'B7':
-                detected_coach = 'B4'
-            else:
-                detected_coach = entered_coach.upper()
-        else:
-            detected_coach = "B4"
-
     if entered_coach and detected_coach:
         entered_normalized = entered_coach.strip().upper()
         detected_normalized = detected_coach.strip().upper()
