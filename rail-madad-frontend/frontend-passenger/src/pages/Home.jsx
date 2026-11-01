@@ -181,7 +181,7 @@ export default function Home() {
     navigate('/report/step1', {
       state: {
         prefill: {
-          trainNumber: journey.trainName,
+          trainNumber: journey.trainNumber,
           coach: journey.coach,
           pnr: journey.pnr,
           berth: journey.berth

@@ -209,8 +209,8 @@ def whatsapp_conversation_turn(history: list, user_message: str, current_collect
 
         fast_models = [
             "meta-llama/llama-3.1-8b-instruct",
-            "meta-llama/llama-3.3-70b-instruct",
-            "google/gemini-2.0-flash-001"
+            "google/gemini-2.5-flash-lite",
+            "nvidia/nemotron-3-ultra-550b-a55b:free"
         ]
 
         raw = None

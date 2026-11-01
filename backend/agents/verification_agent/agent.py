@@ -68,9 +68,9 @@ def generate_explanation(train_number, entered_coach, location_match, distance_k
         
         models = [
             "meta-llama/llama-3.3-70b-instruct",
-            "meta-llama/llama-3.1-8b-instruct",
-            "google/gemini-2.0-flash-001",
-            "openai/gpt-4o-mini"
+            "google/gemini-2.5-flash-lite",
+            "openai/gpt-4o-mini",
+            "nvidia/nemotron-3-ultra-550b-a55b:free"
         ]
         
         for m in models:
@@ -147,17 +147,20 @@ def verify_complaint_evidence(image_path, train_number, coach, query_timestamp=N
     
     # Step 8: Generate explanation and compile response
     reasons = scoring_res.get("reasons", [])
-    explanation = generate_explanation(
-        train_number=train_number,
-        entered_coach=coach,
-        location_match=location_match,
-        distance_km=distance_km or 0.0,
-        coach_match=ocr_res.get("coach_match"),
-        detected_coach=ocr_res.get("ocr_text"),
-        suspicion_score=scoring_res.get("suspicion_score"),
-        risk_level=scoring_res.get("risk_level"),
-        reasons=reasons
-    )
+    if not image_path:
+        explanation = f"No photo evidence provided. Risk level {scoring_res.get('risk_level')}."
+    else:
+        explanation = generate_explanation(
+            train_number=train_number,
+            entered_coach=coach,
+            location_match=location_match,
+            distance_km=distance_km or 0.0,
+            coach_match=ocr_res.get("coach_match"),
+            detected_coach=ocr_res.get("ocr_text"),
+            suspicion_score=scoring_res.get("suspicion_score"),
+            risk_level=scoring_res.get("risk_level"),
+            reasons=reasons
+        )
     
     # Add explanation as the final reason or prefix
     reasons.insert(0, explanation)

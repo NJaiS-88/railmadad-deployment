@@ -236,10 +236,10 @@ def openrouter_caption_image(image_base64_raw: str) -> str:
         )
 
         vision_models = [
-            "thinkingmachines/inkling",
-            "meta-llama/llama-3.2-11b-vision-instruct",
-            "google/gemini-2.0-flash-001",
-            "openai/gpt-4o-mini"
+            "google/gemini-2.5-flash-lite",
+            "openai/gpt-4o-mini",
+            "meta-llama/llama-4-scout",
+            "nvidia/nemotron-3.5-super-vl:free"
         ]
 
         for vmodel in vision_models:
@@ -591,9 +591,9 @@ def analyze_complaint():
 
         analysis_models = [
             "meta-llama/llama-3.3-70b-instruct",
-            "meta-llama/llama-3.1-8b-instruct",
-            "google/gemini-2.0-flash-001",
-            "openai/gpt-4o-mini"
+            "google/gemini-2.5-flash-lite",
+            "openai/gpt-4o-mini",
+            "nvidia/nemotron-3-ultra-550b-a55b:free"
         ]
 
         completion = None
@@ -613,7 +613,7 @@ def analyze_complaint():
                         }
                     ],
                     temperature=0.3,
-                    max_tokens=1024,
+                    max_tokens=2048,
                     stream=False
                 )
                 if completion and completion.choices and completion.choices[0].message.content:
@@ -982,10 +982,10 @@ def scan_id_card():
                 )
 
                 ocr_models = [
-                    "thinkingmachines/inkling",
-                    "meta-llama/llama-3.2-11b-vision-instruct",
-                    "google/gemini-2.0-flash-001",
-                    "openai/gpt-4o-mini"
+                    "google/gemini-2.5-flash-lite",
+                    "openai/gpt-4o-mini",
+                    "meta-llama/llama-4-scout",
+                    "nvidia/nemotron-3.5-super-vl:free"
                 ]
 
                 parsed = None

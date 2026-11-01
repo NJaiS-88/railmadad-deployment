@@ -28,9 +28,9 @@ API_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
 # OpenRouter model cascade
 MODELS: List[str] = [
     "meta-llama/llama-3.3-70b-instruct",
-    "meta-llama/llama-3.1-8b-instruct",
-    "google/gemini-2.0-flash-001",
-    "openai/gpt-4o-mini"
+    "google/gemini-2.5-flash-lite",
+    "openai/gpt-4o-mini",
+    "nvidia/nemotron-3-ultra-550b-a55b:free"
 ]
 
 # ── Tool definitions for the agent loop ──────────────────────────────────────

@@ -1693,7 +1693,7 @@ export default function ReportFlow() {
                     <button
                       key={t.id}
                       type="button"
-                      onClick={() => handleTrainSelect(t.name)}
+                      onClick={() => handleTrainSelect(t.id)}
                       className="w-full text-left px-4 py-3 text-xs font-semibold hover:bg-slate-50 border-b border-slate-50 last:border-0 text-slate-700 flex justify-between items-center"
                     >
                       <span>{t.name}</span>

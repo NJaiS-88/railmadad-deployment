@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import urllib.request
 import ssl
@@ -54,6 +55,12 @@ def parse_time_with_date(time_str, base_date, day_offset=1):
         return None
 
 def get_train_position(train_number, timestamp_query):
+    # Accept display values such as "12951 — Mumbai Rajdhani Express"
+    match = re.search(r"\d{4,5}", str(train_number or ""))
+    if not match:
+        return {"error": f"Invalid train number: {train_number}"}
+    train_number = match.group(0)
+
     query_dt = parse_iso_datetime(timestamp_query)
     if not query_dt:
         query_dt = datetime.now()
