@@ -13,9 +13,11 @@ const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/railmadad';
 
 // Middleware
-const allowedOrigins = process.env.CORS_ORIGIN 
-  ? process.env.CORS_ORIGIN.split(',').map(s => s.trim()) 
-  : true;
+// cors matches array entries literally, so '*' must map to `true` (reflect origin)
+const corsSetting = (process.env.CORS_ORIGIN || '').trim();
+const allowedOrigins = !corsSetting || corsSetting === '*'
+  ? true
+  : corsSetting.split(',').map(s => s.trim()).filter(Boolean);
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));

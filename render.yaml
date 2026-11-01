@@ -24,11 +24,10 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
+      # Public URL of the ML service, e.g. https://railmadad-ml-service.onrender.com
+      # (free web services can't receive private-network traffic, so the public URL is required)
       - key: ML_SERVICE_URL
-        fromService:
-          name: railmadad-ml-service
-          type: web
-          property: url
+        sync: false
 
   # ── 2. Python Multimodal AI Service (Whisper + BLIP + Vision LLM) ───────────
   - type: web

@@ -46,6 +46,14 @@ const baseEnv = {
   VITE_ML_SERVICE_URL: process.env.VITE_ML_SERVICE_URL || process.env.VITE_ML_URL || ''
 };
 
+if (!baseEnv.VITE_API_URL || !baseEnv.VITE_ML_URL) {
+  console.warn('\n⚠️  VITE_API_URL and/or VITE_ML_URL are not set.');
+  console.warn('   The deployed frontends will fall back to http://localhost:5000/api and http://localhost:8000,');
+  console.warn('   which only works on your own machine. Set them in Vercel → Settings → Environment Variables, e.g.');
+  console.warn('   VITE_API_URL=https://<your-backend>.onrender.com/api');
+  console.warn('   VITE_ML_URL=https://<your-ml-service>.onrender.com\n');
+}
+
 function buildFrontend(dir, base, label, destSubdir = '') {
   console.log(`\n📦 Building ${label} (base: "${base}")...`);
   
