@@ -9,6 +9,17 @@ const ML_SERVICE_URL = (process.env.ML_SERVICE_URL || 'http://localhost:8000').r
 const CLASSIFICATION_SERVICE_URL = (process.env.CLASSIFICATION_SERVICE_URL || 'http://localhost:8001').replace(/\/$/, '');
 const STAFF_SERVICE_URL = (process.env.STAFF_SERVICE_URL || 'http://localhost:8002').replace(/\/$/, '');
 
+// LLMs return urgency as free text ("Medium - because ..."); the schema only accepts these four values.
+const URGENCY_LEVELS = ['critical', 'high', 'medium', 'low'];
+const normalizeUrgency = (value) => {
+  const text = String(value || '').toLowerCase();
+  const found = URGENCY_LEVELS
+    .map((level) => ({ level, index: text.indexOf(level) }))
+    .filter((match) => match.index >= 0)
+    .sort((a, b) => a.index - b.index)[0];
+  return found ? found.level : 'medium';
+};
+
 // Helper to generate unique complaint ID (RMDA + timestamp + random digits)
 const generateComplaintId = () => {
   const randomNum = Math.floor(10000000 + Math.random() * 90000000);
@@ -133,7 +144,7 @@ router.post('/', authMiddleware, async (req, res) => {
         category: llmAnalysis.category || category || 'General Complaint',
         department: llmAnalysis.department || normalizeDepartment(llmAnalysis.category || category || 'General'),
         departments: [llmAnalysis.department || normalizeDepartment(llmAnalysis.category || category || 'General')],
-        urgency: llmAnalysis.urgency || 'Medium',
+        urgency: normalizeUrgency(llmAnalysis.urgency),
         manual_review_required: Boolean(llmAnalysis.requires_manual_officer_review),
         confidence: llmAnalysis.confidence || 85
       };
@@ -217,9 +228,9 @@ router.post('/', authMiddleware, async (req, res) => {
       category: classification?.category || category || 'General Complaint',
       // Severity from classification urgency (critical/high → High, low → Low, else Medium)
       severity: (() => {
-        const urg = (classification?.urgency || llmAnalysis?.urgency || '').toLowerCase();
-        if (urg.includes('critical') || urg.includes('high')) return 'High';
-        if (urg.includes('low')) return 'Low';
+        const urg = normalizeUrgency(classification?.urgency || llmAnalysis?.urgency);
+        if (urg === 'critical' || urg === 'high') return 'High';
+        if (urg === 'low') return 'Low';
         return 'Medium';
       })(),
       status: initialStatus,
@@ -241,6 +252,7 @@ router.post('/', authMiddleware, async (req, res) => {
       analysisHistory: llmAnalysis ? [llmAnalysis] : [],
       classification: {
         ...(classification || {}),
+        urgency: normalizeUrgency(classification?.urgency),
         departments: Array.isArray(classification?.departments)
           ? classification.departments
           : (classification?.department ? [classification.department] : []),
@@ -482,7 +494,7 @@ router.post('/:id/followup-answers', authMiddleware, async (req, res) => {
           category: updatedLlm.category || complaint.category || 'General Complaint',
           department: updatedLlm.department || normalizeDepartment(updatedLlm.category || complaint.category || 'General'),
           departments: [updatedLlm.department || normalizeDepartment(updatedLlm.category || complaint.category || 'General')],
-          urgency: updatedLlm.urgency || 'Medium',
+          urgency: normalizeUrgency(updatedLlm.urgency),
           manual_review_required: Boolean(updatedLlm.requires_manual_officer_review),
           confidence: updatedLlm.confidence || 85
         };
@@ -515,6 +527,7 @@ router.post('/:id/followup-answers', authMiddleware, async (req, res) => {
       if (classification) {
         complaint.classification = {
           ...classification,
+          urgency: normalizeUrgency(classification.urgency),
           departments: Array.isArray(classification.departments)
             ? classification.departments
             : (classification.department ? [classification.department] : []),
