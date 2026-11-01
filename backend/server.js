@@ -10,6 +10,9 @@ const trainRoutes = require('./routes/trainRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+if (!process.env.MONGO_URI) {
+  console.error('MONGO_URI is not set — falling back to mongodb://localhost:27017/railmadad');
+}
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/railmadad';
 
 // Middleware
